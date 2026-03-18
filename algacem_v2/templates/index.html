@@ -1,1507 +1,830 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>AlgaCem — Pond Intelligence Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Marginalia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet"/>
 <style>
-:root{
-  --g900:#0a2410;--g800:#15391d;--g700:#1a4a24;--g600:#226030;--g500:#2d7a40;
-  --g400:#3d9952;--g300:#55b56a;--g200:#8ed4a0;--g100:#d0eeda;--g50:#f0f8f3;
-  --amber:#d97706;--amber-l:#fef3c7;--red:#dc2626;--red-l:#fee2e2;--blue:#1d4ed8;
-  --t1:#111827;--t2:#374151;--t3:#6b7280;--t4:#9ca3af;
-  --bd:#e5e7eb;--bg:#eef2ee;--card:#fff;--card2:#f9fbf9;
-  --r:8px;--r2:12px;
-  --sh:0 1px 3px rgba(0,0,0,.08);--sh2:0 4px 12px rgba(0,0,0,.10);
+/* ── Theme variables ─────────────────────────────────────────── */
+:root {
+  --bg:      #F5F0E8;
+  --surf:    #EDE6D8;
+  --surf2:   #E4DBCA;
+  --surf3:   #D9CEB8;
+  --brd:     #C9BFAA;
+  --brdL:    #B8AA90;
+  --txt:     #2C1A0E;
+  --txtS:    #6B4F38;
+  --txtF:    #A08870;
+  --acc:     #5C2A1A;
+  --accH:    #7A3822;
+  --burg:    #8B1A2F;
+  --burgL:   #A8243F;
+  --choc:    #3D1F0F;
+  --sel-hl:  rgba(139,26,47,.22);
 }
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden;background:var(--bg)}
-body{font-family:'Inter',sans-serif;color:var(--t1);display:flex;flex-direction:column;font-size:13px}
+.dark {
+  --bg:      #1A1208;
+  --surf:    #221808;
+  --surf2:   #2C2010;
+  --surf3:   #362818;
+  --brd:     #4A3828;
+  --brdL:    #5C4838;
+  --txt:     #F0E8D8;
+  --txtS:    #C0A888;
+  --txtF:    #7A6050;
+  --acc:     #C9A878;
+  --accH:    #DFC090;
+  --burg:    #C04060;
+  --burgL:   #D85878;
+  --choc:    #E8D0B0;
+  --sel-hl:  rgba(201,168,120,.30);
+}
 
-/* TOP BAR */
-.bar{height:50px;background:var(--g800);display:flex;align-items:center;padding:0 16px;flex-shrink:0}
-.logo-box{display:flex;align-items:center;gap:10px;padding-right:18px;border-right:1px solid var(--g600)}
-.logo-sq{width:32px;height:32px;background:linear-gradient(135deg,#3d9952,#55b56a);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff}
-.logo-t1{font-weight:700;font-size:15px;color:#fff;letter-spacing:.04em}
-.logo-t2{font-size:9px;color:var(--g200);letter-spacing:.15em;text-transform:uppercase;margin-top:1px}
-.bar-title{margin-left:16px;font-size:11px;color:var(--g200);letter-spacing:.18em;text-transform:uppercase;font-weight:500}
-.tickers{margin-left:auto;display:flex;align-items:center;gap:22px}
-.tick-lbl{font-size:8px;color:var(--g200);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1px}
-.tick-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#fff}
-.tick-val.g{color:#86efac}.tick-val.a{color:#fcd34d}
-.live{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;margin-left:8px}
-.live-dot{width:6px;height:6px;background:#86efac;border-radius:50%;animation:blink 1.4s ease-in-out infinite}
-@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 5px #86efac}50%{opacity:.3}}
-.live span{font-size:9px;font-weight:600;color:#86efac;letter-spacing:.1em}
-.clk{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--g200);margin-left:6px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%;overflow:hidden;background:var(--bg);transition:background .3s,color .3s}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--brdL);border-radius:3px}
 
-/* TABS */
-.tabs{height:44px;background:var(--card);border-bottom:1px solid var(--bd);display:flex;align-items:flex-end;padding:0 16px;flex-shrink:0;box-shadow:var(--sh)}
-.tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
-.tab:hover{color:var(--t1)}.tab.on{color:var(--g600);border-bottom-color:var(--g600);font-weight:600}
+.tl{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;line-height:1;user-select:text;pointer-events:none}
+.tl span,.tl br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%;pointer-events:all}
+.tl ::selection{background:var(--sel-hl);color:transparent}
+.tl ::-moz-selection{background:var(--sel-hl);color:transparent}
 
-/* LAYOUT */
-.layout{flex:1;display:flex;overflow:hidden;min-height:0}
-.lpanel{width:230px;flex-shrink:0;background:var(--card);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
-.lpanel.hide,.rpanel.hide{width:0;overflow:hidden;border:none;min-width:0}
-.cpanel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
-.rpanel{width:278px;flex-shrink:0;background:var(--card);border-left:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
+.hl-layer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:hidden}
+.hl-rect{position:absolute;border-radius:2px;pointer-events:auto;cursor:pointer;transition:opacity .15s}
+.hl-rect:hover{opacity:.5!important}
 
-/* SCROLL */
-.scroll{overflow-y:auto}
-::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.ed-body h1{font-size:2em;margin:.8em 0 .4em;font-weight:600;color:var(--txt);font-family:'Cormorant Garamond',Georgia,serif}
+.ed-body h2{font-size:1.55em;margin:.7em 0 .35em;font-weight:600;color:var(--txt);font-family:'Cormorant Garamond',Georgia,serif}
+.ed-body h3{font-size:1.25em;margin:.6em 0 .3em;font-weight:600;color:var(--txtS);font-family:'Cormorant Garamond',Georgia,serif}
+.ed-body p{margin-bottom:.9em}
+.ed-body blockquote{border-left:3px solid var(--burg);padding-left:1.3em;color:var(--txtS);font-style:italic;margin:1.4em 0;line-height:1.85}
+.ed-body ul,.ed-body ol{padding-left:1.6em;margin-bottom:.9em}
+.ed-body li{margin-bottom:.3em}
+[contenteditable]:focus{outline:none}
+[contenteditable]:empty::before{content:attr(data-ph);color:var(--brdL);pointer-events:none}
 
-/* LEFT PANEL */
-.lp-hdr{padding:12px 14px 6px;font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.12em}
-.pl{flex:1;overflow-y:auto;padding:4px 8px}
-.pb{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:var(--r);cursor:pointer;transition:all .15s;border:1px solid transparent;margin-bottom:2px}
-.pb:hover{background:var(--g50);border-color:var(--g100)}.pb.on{background:var(--g50);border-color:var(--g200)}
-.pdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.pname{font-weight:600;font-size:12px;color:var(--t1)}.pstage{font-size:9px;color:var(--t4)}
-.pphval{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);margin-left:auto}
-.lp-div{border:none;border-top:1px solid var(--bd);margin:4px 8px}
-.lp-metrics{padding:8px 12px;border-top:1px solid var(--bd);flex-shrink:0}
-.lm-title{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px}
-.lm-row{display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--g50)}
-.lm-lbl{font-size:10px;color:var(--t3)}.lm-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--t1)}
+.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:8px;border:none;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;text-align:left;transition:all .15s;background:transparent;color:var(--txtS)}
+.nav-btn:hover{background:var(--surf3)}
+.nav-btn.active{background:var(--surf2);color:var(--burg)!important;font-weight:600}
 
-/* KPI STRIP */
-.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 10px 0;flex-shrink:0}
-.kpi-card{background:var(--g700);border-radius:var(--r2);padding:14px;color:#fff}
-.kl{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--g200);margin-bottom:6px}
-.kv{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#fff;line-height:1}
-.ku{font-size:10px;color:var(--g200)}.kch{font-size:9px;margin-top:5px}
-.kch.up{color:#86efac}.kch.w{color:#fcd34d}
+.doc-item{padding:8px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;transition:background .15s}
+.doc-item:hover{background:var(--surf2)}
+.doc-item.active{background:var(--surf3)}
 
-/* STATUS */
-.sp{font-size:9px;font-weight:600;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em}
-.sp.healthy{background:var(--g100);color:var(--g600)}.sp.warning{background:var(--amber-l);color:var(--amber)}.sp.critical{background:var(--red-l);color:var(--red)}
+.lib-card{padding:22px 20px;border-radius:10px;border:1px solid var(--brd);background:var(--surf);cursor:pointer;transition:all .2s;min-height:150px;display:flex;flex-direction:column}
+.lib-card:hover{border-color:var(--burg);background:var(--surf2)}
 
-/* RIGHT PANEL */
-.rp-hdr{padding:12px 14px 8px;border-bottom:1px solid var(--bd);flex-shrink:0}
-.rp-name{font-size:24px;font-weight:700;color:var(--t1);line-height:1}
-.rp-stage{font-size:10px;color:var(--t3);margin-top:2px}
-.rtabs{display:flex;border-bottom:1px solid var(--bd);flex-shrink:0}
-.rtab{flex:1;padding:7px 4px;text-align:center;font-size:9px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
-.rtab.on{color:var(--g600);border-bottom-color:var(--g600);font-weight:600}
-.rview{display:none;flex:1;flex-direction:column;overflow:hidden}.rview.on{display:flex}
+.tool-btn{padding:5px 11px;border-radius:6px;border:none;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;background:transparent;color:var(--txtF);transition:all .15s;line-height:1.4}
+.tool-btn:hover{background:var(--surf3);color:var(--txt)}
 
-/* PARAMS */
-.rs{padding:8px 12px;border-bottom:1px solid var(--bd)}
-.rs-title{font-size:8px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px}
-.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.pc{background:var(--card2);border:1px solid var(--bd);border-radius:6px;padding:7px 8px;transition:border-color .15s}
-.pc:hover{border-color:var(--g200)}
-.pl2{font-size:7px;color:var(--t4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
-.pv{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--t1);line-height:1}
-.pu{font-size:8px;color:var(--t3)}.pt{font-size:8px;margin-top:2px}
-.pt.up{color:var(--g500)}.pt.dn{color:var(--red)}.pt.st{color:var(--t4)}
-.pbar{height:2px;border-radius:1px;margin-top:3px;overflow:hidden;background:var(--g100)}
-.pbf{height:100%;border-radius:1px;transition:width .7s ease}
-.sig{margin:8px 12px;background:var(--g50);border:1px solid var(--g200);border-radius:var(--r);padding:9px 11px}
-.sig.warn{background:var(--amber-l);border-color:#fcd34d}.sig.crit{background:var(--red-l);border-color:#fca5a5}
-.sig-title{font-size:9px;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
-.sig-title.warn{color:var(--amber)}.sig-title.crit{color:var(--red)}
-.sig-txt{font-size:10px;color:var(--t2);line-height:1.5}
+.zoom-btn{padding:4px 10px;border-radius:6px;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:12px;border:1px solid var(--brd);background:transparent;color:var(--txtF);transition:all .15s}
+.zoom-btn:hover{border-color:var(--burg);color:var(--burg)}
+.zoom-btn.active{background:var(--burg);color:#FFF5EE;border-color:var(--burg);font-weight:600}
 
-/* ALERTS */
-.alist{flex:1;overflow-y:auto}
-.ait{display:flex;gap:9px;padding:9px 12px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .12s}
-.ait:hover{background:var(--g50)}.ait.critical{border-left:3px solid var(--red)}.ait.warning{border-left:3px solid var(--amber)}.ait.info{border-left:3px solid var(--g300)}
-.adot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:3px}
-.ap{font-weight:700;font-size:11px}.abadge{font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px;text-transform:uppercase;margin-left:5px}
-.abadge.critical{background:var(--red-l);color:var(--red)}.abadge.warning{background:var(--amber-l);color:var(--amber)}.abadge.info{background:var(--g100);color:var(--g600)}
-.atxt{font-size:10px;color:var(--t3);line-height:1.45;margin-top:2px}.atime{font-size:8px;color:var(--t4);margin-top:1px}
-.aexp{display:none;margin-top:7px;padding-top:7px;border-top:1px solid var(--bd)}.aexp.on{display:block}
-.aact{display:flex;gap:5px;margin-bottom:3px;font-size:10px;color:var(--t2)}.aact::before{content:"→";color:var(--g500);flex-shrink:0}
+.ann-item{margin:4px 10px;padding:12px 14px;border-radius:8px;border:1px solid transparent;transition:all .2s}
+.ann-item.focused{background:var(--surf2)}
 
-/* ACTIONS (RECS) */
-.rec-box{background:var(--g50);border:1px solid var(--g100);border-left:3px solid var(--g500);border-radius:var(--r);padding:9px 11px;margin-bottom:7px}
+.fade-in{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* TAB CONTENT */
-.cv{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0}.cv.on{display:flex}
+.upload-zone{padding:22px 20px;border-radius:10px;border:1px dashed var(--brdL);background:transparent;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:150px;gap:10px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--burg);background:var(--surf2)}
 
-/* CARD */
-.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r2);padding:12px 14px;box-shadow:var(--sh)}
-.ct{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
-.cs{font-size:10px;color:var(--t4);margin-bottom:8px}
+.modal-bg{position:fixed;inset:0;background:rgba(44,26,14,.55);display:flex;align-items:center;justify-content:center;z-index:9999}
+.dark .modal-bg{background:rgba(0,0,0,.72)}
+.modal{background:var(--surf);border:1px solid var(--brdL);border-radius:14px;padding:28px;width:400px;box-shadow:0 24px 64px rgba(44,26,14,.18);animation:fadeIn .2s ease}
+.dark .modal{box-shadow:0 32px 80px rgba(0,0,0,.7)}
 
-/* MODULE BAR */
-.mbar2{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--bd);flex-shrink:0}
-.mt{font-size:14px;font-weight:700;color:var(--t1)}.ms{font-size:10px;color:var(--t3)}
-.psel{padding:5px 9px;border:1px solid var(--bd);border-radius:var(--r);font-size:11px;color:var(--t1);background:var(--card);cursor:pointer}
+.color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;transition:transform .12s,box-shadow .12s;border:2.5px solid transparent;flex-shrink:0}
+.color-dot.sel{transform:scale(1.18)}
 
-/* OVERVIEW */
-#wrap3d{flex:1;position:relative;margin:8px 10px 0;border-radius:var(--r2);overflow:hidden;border:1px solid var(--bd)}
-#canvas3d{display:block;width:100%;height:100%}
-.c3badge{position:absolute;top:10px;left:10px;background:rgba(255,255,255,.92);border:1px solid var(--bd);border-radius:var(--r);padding:4px 10px;font-size:9px;font-weight:500;color:var(--t2)}
-.c3hint{position:absolute;bottom:8px;right:10px;font-size:8px;color:var(--t4);background:rgba(255,255,255,.88);padding:2px 8px;border-radius:var(--r)}
-.time-ov{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.93);border:1px solid var(--bd);border-radius:var(--r2);padding:7px 14px;display:flex;align-items:center;gap:10px;min-width:260px;box-shadow:var(--sh2)}
-.tov-lbl{font-size:9px;font-weight:600;color:var(--g700);white-space:nowrap}
-.tov-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--g700);min-width:38px;text-align:right}
-input[type=range]{accent-color:var(--g500);cursor:pointer}
+.input-base{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;padding:10px 13px;line-height:1.6;resize:none;transition:border-color .15s}
+.input-base:focus{outline:none;border-color:var(--burg)}
 
-/* MONITOR */
-.mon-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:8px;padding:10px;flex:1;overflow:hidden;min-height:0}
-.mpc{background:var(--card);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:border-color .18s;display:flex;flex-direction:column;box-shadow:var(--sh)}
-.mpc:hover{border-color:var(--g300);box-shadow:var(--sh2)}.mpc.on{border-color:var(--g400)}
-.mpc3d{flex:1;min-height:0;position:relative}.mpc3d canvas{display:block;width:100%;height:100%}
-.mpcbot{padding:7px 10px;border-top:1px solid var(--bd);background:var(--card2)}
-.mpchdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.mpcname{font-size:16px;font-weight:700;color:var(--t1)}
-.mpcparams{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
-.mpcp{text-align:center;padding:3px 4px;background:var(--card);border-radius:4px;border:1px solid var(--bd)}
-.mpcpl{font-size:7px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em}
-.mpcpv{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--t1)}
+.btn{font-family:'Cormorant Garamond',Georgia,serif;cursor:pointer;border:none;border-radius:8px;transition:all .15s;padding:8px 20px;font-size:14px}
+.btn-ghost{background:transparent;color:var(--txtS);border:1px solid var(--brd)}
+.btn-ghost:hover{border-color:var(--burg);color:var(--burg)}
+.btn-acc{background:var(--burg);color:#FFF5EE;font-weight:600}
+.btn-acc:hover{background:var(--burgL)}
 
-/* CO2 */
-.co2-lay{flex:1;display:grid;grid-template-columns:1fr 360px;overflow:hidden;min-height:0}
-.co2l{display:flex;flex-direction:column;padding:10px 0 10px 10px;gap:8px;overflow:hidden}
-.co2r{display:flex;flex-direction:column;padding:10px 10px 10px 0;gap:8px;overflow:hidden;margin-left:10px}
-.co2row{display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--card);border:1px solid var(--bd);border-left:3px solid transparent;border-radius:var(--r);cursor:pointer;transition:all .18s}
-.co2row:hover{border-color:var(--g200)}.co2row.on{border-left-color:var(--g500);background:var(--g50);border-color:var(--g200)}
-.co2rn{font-weight:700;font-size:14px;width:34px;flex-shrink:0}.co2rdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.co2tw{flex:1}.co2tr{height:6px;background:var(--g50);border-radius:3px;overflow:hidden;border:1px solid var(--g100);margin-bottom:2px}
-.co2tf{height:100%;border-radius:3px;transition:width 1s ease}
-.co2tl{display:flex;justify-content:space-between;font-size:8px}
-.co2chg{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;width:46px;text-align:right;flex-shrink:0}
-.co2chg.up{color:var(--g500)}.co2chg.dn{color:var(--amber)}.co2chg.st{color:var(--t4)}
-.co2det{flex:1;background:var(--card);border:1px solid var(--bd);border-radius:var(--r2);padding:14px;overflow-y:auto;box-shadow:var(--sh)}
-
-/* HARVEST */
-.hv-lay{flex:1;display:grid;grid-template-columns:1fr 300px;overflow:hidden;min-height:0}
-.hvl{display:flex;flex-direction:column;padding:10px 0 10px 10px;gap:8px;overflow:hidden;min-height:0}
-.hvr{display:flex;flex-direction:column;padding:10px 10px 10px 0;gap:8px;overflow-y:auto;margin-left:10px}
-.hvcal{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--card);border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;transition:border-color .15s}
-.hvcal:hover{border-color:var(--g300)}
-
-/* SIM */
-.sim-lay{flex:1;display:grid;grid-template-columns:258px 1fr;overflow:hidden;min-height:0}
-.simctl{background:var(--card);border-right:1px solid var(--bd);padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
-.shdr{font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.12em;padding-bottom:5px;border-bottom:1px solid var(--bd)}
-.citem{display:flex;flex-direction:column;gap:4px}
-.clr{display:flex;justify-content:space-between;align-items:baseline}
-.clbl{font-size:11px;font-weight:500;color:var(--t2)}.cval{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--g600)}
-.csub{font-size:9px;color:var(--t4)}
-input[type=range]{width:100%;height:4px}
-.simres{background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
-.simkpis{display:flex;gap:6px;padding:8px 10px;flex-shrink:0;background:var(--card);border-bottom:1px solid var(--bd)}
-.skpi{flex:1;padding:7px 10px;border-radius:var(--r);text-align:center;border:1px solid transparent}
-.skl{font-size:8px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
-.skv{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;line-height:1}
-.sks{font-size:9px;font-weight:500;margin-top:2px}
-.simcharts{flex:1;display:grid;grid-template-rows:1fr 1fr;grid-template-columns:1fr 1fr;gap:6px;padding:8px;overflow:hidden;min-height:0}
-.scrd{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:9px;display:flex;flex-direction:column;overflow:hidden}
-.sct{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1px}
-.scs{font-size:8px;color:var(--t4);margin-bottom:5px}.scw{flex:1;position:relative;min-height:0}
-
-/* CARBON */
-.carb-lay{flex:1;display:grid;grid-template-columns:1fr 256px;gap:8px;padding:10px;overflow:hidden;min-height:0}
-.carbl{display:flex;flex-direction:column;gap:8px;overflow:hidden}
-.carbr{display:flex;flex-direction:column;gap:8px;overflow-y:auto}
-.ctable table{width:100%;border-collapse:collapse;font-size:10px}
-.ctable th{background:var(--g700);color:#fff;padding:5px 7px;text-align:left;font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
-.ctable td{padding:5px 7px;border-bottom:1px solid var(--g50)}
-
-/* BRIEFING */
-.brief-lay{flex:1;overflow-y:auto;display:flex;flex-direction:column}
-.brief-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;background:var(--card);border-bottom:1px solid var(--bd);flex-shrink:0}
-.bkpi{background:var(--g50);border:1px solid var(--g100);border-radius:var(--r);padding:10px 12px}
-.bkl{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:3px}
-.bkv{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--g600)}
-.bks{font-size:9px;color:var(--t3);margin-top:2px}
-.brief-body{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
-.bsect{background:var(--card);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;box-shadow:var(--sh)}
-.bsect.full{grid-column:1/-1}
-.bshdr{padding:10px 14px;border-bottom:1px solid var(--bd);background:var(--card2);display:flex;align-items:center;gap:8px}
-.bst{font-size:11px;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:.08em}
-.bbody{padding:10px 14px}
-.bitem{padding:7px 10px;border-radius:var(--r);border:1px solid var(--bd);margin-bottom:5px}
-.bih{font-weight:600;font-size:11px;margin-bottom:2px}.bib{font-size:10px;color:var(--t2);line-height:1.6}
-.bprow{display:grid;grid-template-columns:36px 1fr auto;align-items:start;gap:8px;padding:7px 0;border-bottom:1px solid var(--g50)}
-.bpid{font-size:15px;font-weight:700;color:var(--t1)}.bpd{font-size:10px;color:var(--t2);line-height:1.55}
+/* theme toggle */
+.theme-toggle{width:40px;height:22px;border-radius:11px;background:var(--surf3);border:1px solid var(--brdL);cursor:pointer;position:relative;transition:background .25s;flex-shrink:0}
+.theme-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--txtS);transition:transform .25s,background .25s}
+.dark .theme-toggle::after{transform:translateX(18px);background:var(--acc)}
 </style>
 </head>
 <body>
+<div id="root"></div>
 
-<!-- TOP BAR -->
-<div class="bar">
-  <div class="logo-box">
-    <div class="logo-sq">AC</div>
-    <div><div class="logo-t1">ALGACEM</div><div class="logo-t2">CIMAR · Safi</div></div>
-  </div>
-  <div class="bar-title">Pond Intelligence Dashboard</div>
-  <div class="tickers">
-    <div><div class="tick-lbl">Biomass</div><div class="tick-val g" id="tb">—</div></div>
-    <div><div class="tick-lbl">CO₂ Today</div><div class="tick-val g" id="tc">—</div></div>
-    <div><div class="tick-lbl">Avg pH</div><div class="tick-val" id="tp">—</div></div>
-    <div><div class="tick-lbl">Active</div><div class="tick-val">7/8</div></div>
-    <div><div class="tick-lbl">Alerts</div><div class="tick-val a" id="ta">—</div></div>
-    <div class="live"><div class="live-dot"></div><span>LIVE</span></div>
-    <div class="clk" id="clk">—</div>
-  </div>
-</div>
-
-<!-- MAIN TABS -->
-<div class="tabs">
-  <div class="tab on" onclick="showTab('overview',this)">Overview</div>
-  <div class="tab" onclick="showTab('monitor',this)">Live Monitor</div>
-  <div class="tab" onclick="showTab('co2',this)">CO₂ Optimizer</div>
-  <div class="tab" onclick="showTab('harvest',this)">Harvest Predictor</div>
-  <div class="tab" onclick="showTab('sim',this)">Simulation Lab</div>
-  <div class="tab" onclick="showTab('carbon',this)">Carbon Ledger</div>
-  <div class="tab" onclick="showTab('briefing',this)">AI Briefing</div>
-</div>
-
-<div class="layout">
-  <!-- LEFT -->
-  <div class="lpanel" id="lp">
-    <div class="lp-hdr">Pond Selection</div>
-    <div class="pl" id="pond-list"></div>
-    <hr class="lp-div">
-    <div class="lp-metrics">
-      <div class="lm-title">Selected Pond</div>
-      <div class="lm-row"><span class="lm-lbl">pH</span><span class="lm-val" id="qph">—</span></div>
-      <div class="lm-row"><span class="lm-lbl">Temperature</span><span class="lm-val" id="qtemp">—</span></div>
-      <div class="lm-row"><span class="lm-lbl">CO₂ Flow</span><span class="lm-val" id="qco2">—</span></div>
-      <div class="lm-row"><span class="lm-lbl">Density</span><span class="lm-val" id="qdens">—</span></div>
-      <div class="lm-row"><span class="lm-lbl">Biomass</span><span class="lm-val" id="qbio">—</span></div>
-      <div class="lm-row" style="border:none"><span class="lm-lbl">Days to Harvest</span><span class="lm-val" id="qdth">—</span></div>
-    </div>
-  </div>
-
-  <!-- CENTER -->
-  <div class="cpanel">
-
-    <!-- OVERVIEW -->
-    <div class="cv on" id="cv-overview">
-      <div class="kpi-strip" id="kpi-strip"></div>
-      <div id="wrap3d">
-        <canvas id="canvas3d"></canvas>
-        <div class="c3badge">AlgaCem Farm · Safi, Morocco · 8 Raceways · Spirulina platensis</div>
-        <div class="c3hint">Drag to rotate · Scroll to zoom · Click pond to select</div>
-        <div class="time-ov">
-          <span class="tov-lbl">🕐 Time</span>
-          <input type="range" id="time-sl" min="0" max="23.9" step="0.1" value="12" style="flex:1" oninput="onTimeSlider(this.value)">
-          <span class="tov-val" id="time-val">12:00</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- MONITOR -->
-    <div class="cv" id="cv-monitor">
-      <div class="mon-grid" id="mon-grid"></div>
-    </div>
-
-    <!-- CO2 -->
-    <div class="cv" id="cv-co2">
-      <div class="mbar2">
-        <div><div class="mt">CO₂ Optimizer</div><div class="ms">Click any pond row for detailed analysis and AI recommendations</div></div>
-        <div style="margin-left:auto;display:flex;gap:20px">
-          <div><div style="font-size:8px;color:var(--t4);text-transform:uppercase;letter-spacing:.1em">Kiln Output</div><div class="mono" style="font-size:20px;font-weight:700;color:var(--g600)">182 <span style="font-size:11px;color:var(--t3)">m³/h</span></div></div>
-          <div><div style="font-size:8px;color:var(--t4);text-transform:uppercase;letter-spacing:.1em">Utilization</div><div class="mono" style="font-size:20px;font-weight:700;color:var(--g600)">91<span style="font-size:11px;color:var(--t3)">%</span></div></div>
-        </div>
-      </div>
-      <div class="co2-lay">
-        <div class="co2l">
-          <div class="card" style="flex-shrink:0">
-            <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--t4);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.08em"><span>POND</span><span style="flex:1;padding-left:26px">CURRENT → RECOMMENDED</span><span>CHANGE</span><span style="width:68px;text-align:right">REC m³/h</span></div>
-            <div id="co2-rows" style="display:flex;flex-direction:column;gap:4px"></div>
-          </div>
-          <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0">
-            <div class="ct">Flow Allocation Chart</div>
-            <div style="flex:1;position:relative;min-height:0"><canvas id="co2-chart"></canvas></div>
-          </div>
-        </div>
-        <div class="co2r">
-          <div class="co2det" id="co2-det">
-            <div style="text-align:center;padding:40px 0;color:var(--t4)">
-              <div style="font-size:36px;margin-bottom:10px">💡</div>
-              <div style="font-size:12px;font-weight:500">Click a pond row to see<br>detailed CO₂ analysis</div>
-            </div>
-          </div>
-          <div class="card" style="flex-shrink:0">
-            <div class="ct">CO₂ Absorption %</div>
-            <div style="position:relative;height:130px"><canvas id="co2-abs-chart"></canvas></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- HARVEST -->
-    <div class="cv" id="cv-harvest">
-      <div class="mbar2">
-        <div><div class="mt">Harvest Predictor</div><div class="ms">AI logistic growth model · 90% confidence band · Weather-adjusted</div></div>
-        <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
-          <span style="font-size:10px;color:var(--t3)">Pond:</span>
-          <select class="psel" id="hv-sel" onchange="loadPredChart()"></select>
-        </div>
-      </div>
-      <div class="hv-lay">
-        <div class="hvl">
-          <div class="card" style="flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:10px 14px">
-            <div><div class="ct" id="pred-title">Growth Curve — A-2</div><div class="cs">Historical + 14-day AI forecast + 90% confidence</div></div>
-            <div id="pred-badges" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end"></div>
-          </div>
-          <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0">
-            <div style="flex:1;position:relative;min-height:0"><canvas id="pred-chart"></canvas></div>
-          </div>
-          <div class="card" style="flex-shrink:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px">
-            <div><div style="font-size:8px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">PAR Light (24h)</div><div style="position:relative;height:70px"><canvas id="par-chart"></canvas></div></div>
-            <div><div style="font-size:8px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Growth Factor (24h)</div><div style="position:relative;height:70px"><canvas id="gf-chart"></canvas></div></div>
-          </div>
-        </div>
-        <div class="hvr">
-          <div style="background:var(--g700);color:#fff;border-radius:var(--r2);padding:14px;flex-shrink:0">
-            <div style="font-size:8px;color:var(--g200);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">AI Harvest Signal</div>
-            <div style="font-size:22px;font-weight:700" id="hv-name">A-2</div>
-            <div style="font-size:10px;color:var(--g200);margin-top:2px" id="hv-stage">—</div>
-            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--g600);font-size:10px;color:var(--g100);line-height:1.55;white-space:pre-line" id="hv-signal">—</div>
-          </div>
-          <div class="card"><div class="ct">Harvest Calendar</div><div id="hv-cal" style="margin-top:5px;display:flex;flex-direction:column;gap:4px"></div></div>
-          <div class="card"><div class="ct">Safi Weather</div><div id="hv-wx" style="margin-top:4px"></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SIM LAB -->
-    <div class="cv" id="cv-sim">
-      <div class="sim-lay">
-        <div class="simctl">
-          <div><div style="font-size:13px;font-weight:700;color:var(--t1)">Simulation Lab</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Adjust parameters — all 4 charts update live per pond</div></div>
-          <div>
-            <div class="shdr">Pond</div>
-            <select id="sim-sel" onchange="simUpdate()" style="width:100%;padding:6px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:11px;background:var(--card);cursor:pointer;margin-top:6px">
-              <option value="A-1">A-1 — Day 3 · Linear</option>
-              <option value="A-2" selected>A-2 — Day 4 · Exponential</option>
-              <option value="A-3">A-3 — Day 6 · Near Peak</option>
-              <option value="A-4">A-4 — Day 2 · Inoculation</option>
-              <option value="B-1">B-1 — Day 4 · Exponential</option>
-              <option value="B-2">B-2 — Day 7 · Peak</option>
-              <option value="B-3">B-3 — Day 9 · Declining</option>
-              <option value="B-4">B-4 — Day 1 · Inoculation</option>
-            </select>
-          </div>
-          <div><div class="shdr">Environmental</div>
-            <div style="margin-top:8px;display:flex;flex-direction:column;gap:10px">
-              <div class="citem"><div class="clr"><span class="clbl">🕐 Time of Day</span><span class="cval" id="sv-time">12:00</span></div><input type="range" id="sr-time" min="0" max="23.9" step="0.1" value="12" oninput="simUpdate()"><div class="csub">Drives PAR, temperature, pH rise</div></div>
-              <div class="citem"><div class="clr"><span class="clbl">🌡 Temp offset</span><span class="cval" id="sv-temp">+0.0°C</span></div><input type="range" id="sr-temp" min="-5" max="10" step="0.5" value="0" oninput="simUpdate()"><div class="csub">Adjustment from 23.5°C baseline</div></div>
-              <div class="citem"><div class="clr"><span class="clbl">☁ Cloud Cover</span><span class="cval" id="sv-cloud">0%</span></div><input type="range" id="sr-cloud" min="0" max="100" step="5" value="0" oninput="simUpdate()"><div class="csub">Reduces PAR and growth rate</div></div>
-            </div>
-          </div>
-          <div><div class="shdr">Operational</div>
-            <div style="margin-top:8px;display:flex;flex-direction:column;gap:10px">
-              <div class="citem"><div class="clr"><span class="clbl">💨 CO₂ Flow</span><span class="cval" id="sv-co2">18 m³/h</span></div><input type="range" id="sr-co2" min="4" max="32" step="0.5" value="18" oninput="simUpdate()"><div class="csub">Controls pH buffering and growth</div></div>
-              <div class="citem"><div class="clr"><span class="clbl">🌊 Paddlewheel RPM</span><span class="cval" id="sv-rpm">22 RPM</span></div><input type="range" id="sr-rpm" min="8" max="30" step="1" value="22" oninput="simUpdate()"><div class="csub">Mixing efficiency</div></div>
-            </div>
-          </div>
-          <div id="sim-risk" style="background:var(--g50);border:1px solid var(--g100);border-radius:var(--r);padding:9px;font-size:10px;color:var(--t2);line-height:1.5"></div>
-        </div>
-        <div class="simres">
-          <div class="simkpis" id="sim-kpis"></div>
-          <div class="simcharts">
-            <div class="scrd"><div class="sct">pH Trajectory (24h)</div><div class="scs" id="sc-ph-sub">CO₂ vs photosynthetic demand</div><div class="scw"><canvas id="sc-ph"></canvas></div></div>
-            <div class="scrd"><div class="sct">Growth Factor (24h)</div><div class="scs" id="sc-gf-sub">Combined limitation factors</div><div class="scw"><canvas id="sc-gf"></canvas></div></div>
-            <div class="scrd"><div class="sct">Temperature & PAR</div><div class="scs" id="sc-tp-sub">Daily cycle</div><div class="scw"><canvas id="sc-tp"></canvas></div></div>
-            <div class="scrd"><div class="sct">O₂ & CO₂ Absorption</div><div class="scs" id="sc-o2-sub">Biological activity</div><div class="scw"><canvas id="sc-o2"></canvas></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CARBON -->
-    <div class="cv" id="cv-carbon">
-      <div class="mbar2">
-        <div><div class="mt">Carbon Ledger</div><div class="ms">Automated CO₂ tracking · Heidelberg Materials reporting format</div></div>
-        <div style="display:flex;gap:8px;margin-left:auto">
-          <button onclick="window.open('/api/export/excel?hour='+curHour,'_blank')" style="background:var(--g700);color:#fff;border:none;padding:7px 14px;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">⬇ Excel Report</button>
-          <button onclick="window.open('/api/export/heidelberg?hour='+curHour,'_blank')" style="background:var(--card2);color:var(--t2);border:1px solid var(--bd);padding:7px 14px;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">📄 Heidelberg PDF</button>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 10px 0;flex-shrink:0">
-        <div class="card" style="padding:10px 12px"><div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:3px">CO₂ Today</div><div class="mono" style="font-size:18px;font-weight:700;color:var(--g600)" id="ck-today">—</div><div style="font-size:9px;color:var(--t3)">vs 110 kg target</div></div>
-        <div class="card" style="padding:10px 12px"><div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:3px">This Month</div><div class="mono" style="font-size:18px;font-weight:700;color:var(--g600)">3.24 t</div><div style="font-size:9px;color:var(--t3)">↑ vs 2.98 t target</div></div>
-        <div class="card" style="padding:10px 12px"><div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:3px">Annual YTD</div><div class="mono" style="font-size:18px;font-weight:700;color:var(--g600)">11.8 t</div><div style="font-size:9px;color:var(--t3)">47% of annual goal</div></div>
-        <div class="card" style="padding:10px 12px"><div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:3px">Efficiency</div><div class="mono" style="font-size:18px;font-weight:700;color:var(--g600)">1.84</div><div style="font-size:9px;color:var(--t3)">kg CO₂/kg biomass</div></div>
-      </div>
-      <div class="carb-lay">
-        <div class="carbl">
-          <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0">
-            <div class="ct">Daily CO₂ Capture — 30-Day History</div>
-            <div class="cs">vs 110 kg/day target</div>
-            <div style="flex:1;position:relative;min-height:0"><canvas id="carb-chart"></canvas></div>
-          </div>
-        </div>
-        <div class="carbr">
-          <div class="card" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
-            <div class="ct" style="margin-bottom:6px">Per-Pond Ledger (Today)</div>
-            <div class="ctable scroll" style="flex:1" id="carb-table"></div>
-          </div>
-          <div class="card" style="flex-shrink:0;padding:10px 12px">
-            <div class="ct" style="margin-bottom:5px">Report Format</div>
-            <div style="font-size:9px;color:var(--t3);line-height:1.6">Excel: 2 sheets — per-pond data + 30-day history with colors.<br>PDF: Full Heidelberg-format report with charts, auto-prints.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- BRIEFING -->
-    <div class="cv" id="cv-briefing">
-      <div class="brief-lay">
-        <div class="brief-kpis" id="brief-kpis"></div>
-        <div class="brief-body" id="brief-body" style="overflow-y:auto;flex:1"></div>
-      </div>
-    </div>
-
-  </div><!-- /cpanel -->
-
-  <!-- RIGHT -->
-  <div class="rpanel" id="rp">
-    <div class="rp-hdr">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div class="rp-name" id="rp-name">A-2</div>
-        <div class="sp healthy" id="rp-status">Healthy</div>
-      </div>
-      <div class="rp-stage" id="rp-stage">—</div>
-    </div>
-    <div class="rtabs">
-      <div class="rtab on" onclick="rpTab('params',this)">Params</div>
-      <div class="rtab" onclick="rpTab('alerts',this)">Alerts</div>
-      <div class="rtab" onclick="rpTab('actions',this)">Actions</div>
-    </div>
-    <div class="rview on scroll" id="rv-params">
-      <div class="rs"><div class="rs-title">Live Sensor Data</div><div class="pgrid" id="pgrid"></div></div>
-      <div class="sig" id="sig-box"><div class="sig-title">AI Harvest Signal</div><div class="sig-txt" id="sig-txt">—</div></div>
-    </div>
-    <div class="rview" id="rv-alerts"><div class="alist" id="alist"></div></div>
-    <div class="rview scroll" id="rv-actions">
-      <div style="padding:10px 12px">
-        <div style="font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px">Actions — <span id="rec-name">—</span></div>
-        <div id="rec-list"></div>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /layout -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 
 <script>
-'use strict';
-// ══════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════
-let ponds = [], selPond = null, curHour = 12;
-const CHARTS = {};
-const POND_COLORS = ['#2d7a40','#1d4ed8','#d97706','#7c3aed','#dc2626','#0891b2','#16a34a','#9333ea'];
-const POND_IDS = ['A-1','A-2','A-3','A-4','B-1','B-2','B-3','B-4'];
-function pcolor(id){ return POND_COLORS[POND_IDS.indexOf(id)] || '#2d7a40'; }
-function scolor(s){ return s==='healthy'?'#16a34a':s==='warning'?'#d97706':'#dc2626'; }
-
-// ══════════════════════════════════════════════════════
-// CLOCK
-// ══════════════════════════════════════════════════════
-function tickClock(){
-  const d = new Date();
-  const el = document.getElementById('clk');
-  if(el) el.textContent = d.toLocaleDateString('fr-MA') + ' ' + d.toLocaleTimeString('fr-MA');
-}
-setInterval(tickClock, 1000); tickClock();
-
-// ══════════════════════════════════════════════════════
-// CHART HELPERS
-// ══════════════════════════════════════════════════════
-const CD = {
-  responsive:true, maintainAspectRatio:false,
-  plugins:{
-    legend:{labels:{color:'#6b7280',font:{family:'Inter',size:10},boxWidth:10,padding:8}},
-    tooltip:{backgroundColor:'#1f2937',titleColor:'#f9fafb',bodyColor:'#d1d5db',
-      titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:10},cornerRadius:6,padding:7}
-  },
-  scales:{
-    x:{grid:{color:'#f3f4f6'},ticks:{color:'#9ca3af',font:{family:'JetBrains Mono',size:9}}},
-    y:{grid:{color:'#f3f4f6'},ticks:{color:'#6b7280',font:{family:'JetBrains Mono',size:9}}}
-  }
+/* ─── Storage (localStorage) ──────────────────────────────────────── */
+const store = {
+  get(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch{ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ console.warn('Storage error',e); return false; } },
+  del(k){ try{ localStorage.removeItem(k); }catch{} }
 };
-function mkChart(id, cfg){
-  const c = document.getElementById(id); if(!c) return null;
-  if(CHARTS[id]){ try{CHARTS[id].destroy();}catch(e){} }
-  const ch = new Chart(c, cfg); CHARTS[id] = ch; return ch;
-}
 
-// ══════════════════════════════════════════════════════
-// 2D CANVAS FARM OVERVIEW
-// ══════════════════════════════════════════════════════
-let farmCanvas=null, farmCtx=null, farmAnim=0, farmAnimId=null;
-let farmPondData=[];
+/* PDF blobs can be large; we store them as separate keys */
+const K = {
+  docs:    'mg:docs',
+  essays:  'mg:essays',
+  pdf:     id => `mg:pdf:${id}`,
+  hl:      id => `mg:hl:${id}`,
+  essay:   id => `mg:essay:${id}`,
+};
 
-const FARM_LAYOUT=[
-  {id:'A-1',cx:140,cy:200},{id:'A-2',cx:320,cy:200},{id:'A-3',cx:500,cy:200},{id:'A-4',cx:680,cy:200},
-  {id:'B-1',cx:140,cy:360},{id:'B-2',cx:320,cy:360},{id:'B-3',cx:500,cy:360},{id:'B-4',cx:680,cy:360},
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+const HL_COLORS = [
+  {id:'amber', bg:'rgba(215,158,55,.38)',  bd:'#D79E37', label:'Amber'},
+  {id:'rose',  bg:'rgba(210,85,95,.36)',   bd:'#D25560', label:'Rose'},
+  {id:'sage',  bg:'rgba(72,158,122,.36)',  bd:'#489E7A', label:'Sage'},
+  {id:'iris',  bg:'rgba(140,104,200,.36)', bd:'#8C68C8', label:'Iris'},
 ];
 
-function densityToHex(density, status){
-  if(status==='critical') return '#7a4a2a';
-  const t=Math.min(1,density/2.1);
-  const r=Math.round(20+t*10), g=Math.round(80+t*90), b=Math.round(40+t*20);
-  return `rgb(${r},${g},${b})`;
-}
-
-function initFarm(){
-  farmCanvas=document.getElementById('canvas3d');
-  if(!farmCanvas) return;
-  farmCtx=farmCanvas.getContext('2d');
-  resizeFarm();
-  window.addEventListener('resize', resizeFarm);
-  // Click handler
-  farmCanvas.addEventListener('click', e=>{
-    const r=farmCanvas.getBoundingClientRect();
-    const scx=(e.clientX-r.left)*(farmCanvas.width/r.width);
-    const scy=(e.clientY-r.top)*(farmCanvas.height/r.height);
-    const sx=farmCanvas.width/820, sy=farmCanvas.height/500;
-    FARM_LAYOUT.forEach(lc=>{
-      const px=lc.cx*sx, py=lc.cy*sy, pw=140*sx, ph=110*sy;
-      if(scx>=px-pw/2&&scx<=px+pw/2&&scy>=py-ph/2&&scy<=py+ph/2){
-        const pd=ponds.find(p=>p.id===lc.id); if(pd) selPond_(pd);
-      }
-    });
-  });
-  farmCanvas.style.cursor='pointer';
-  animFarm();
-}
-
-function resizeFarm(){
-  const wrap=document.getElementById('wrap3d'); if(!farmCanvas||!wrap) return;
-  const w=wrap.offsetWidth||800, h=wrap.offsetHeight||460;
-  farmCanvas.width=Math.max(400,w);
-  farmCanvas.height=Math.max(300,h);
-}
-
-function animFarm(){
-  farmAnimId=requestAnimationFrame(animFarm);
-  farmAnim+=0.02;
-  drawFarm();
-}
-
-function drawFarm(){
-  if(!farmCtx||!farmCanvas) return;
-  const W=farmCanvas.width, H=farmCanvas.height;
-  const hour=curHour;
-  // Sky
-  const isDay=hour>=6&&hour<=20;
-  let skyTop,skyBot;
-  if(hour<5||hour>21){skyTop='#08082a';skyBot='#12124a';}
-  else if((hour>=5&&hour<7)||(hour>=19&&hour<21)){skyTop='#e8631a';skyBot='#f5a050';}
-  else if((hour>=7&&hour<9)||(hour>=17&&hour<19)){skyTop='#7ab0d8';skyBot='#c8dff0';}
-  else{skyTop='#4a9fd4';skyBot='#87ccf0';}
-  const skyGrad=farmCtx.createLinearGradient(0,0,0,H*0.42);
-  skyGrad.addColorStop(0,skyTop);skyGrad.addColorStop(1,skyBot);
-  farmCtx.fillStyle=skyGrad;farmCtx.fillRect(0,0,W,H);
-  // Ground plane (perspective)
-  const gGrad=farmCtx.createLinearGradient(0,H*0.38,0,H);
-  gGrad.addColorStop(0,'#c4b494');gGrad.addColorStop(0.4,'#b8a880');gGrad.addColorStop(1,'#a89870');
-  farmCtx.fillStyle=gGrad;farmCtx.fillRect(0,H*0.38,W,H*0.62);
-  // Horizon line
-  farmCtx.strokeStyle='rgba(180,160,120,0.5)';farmCtx.lineWidth=1;
-  farmCtx.beginPath();farmCtx.moveTo(0,H*0.38);farmCtx.lineTo(W,H*0.38);farmCtx.stroke();
-  // Sun/moon
-  if(isDay&&hour>=6&&hour<=20){
-    const sa=((hour-6)/14)*Math.PI;
-    const sx=W*0.08+W*0.84*((hour-6)/14),sy=H*0.35-Math.sin(sa)*H*0.32;
-    const sunGrad=farmCtx.createRadialGradient(sx,sy,0,sx,sy,22);
-    sunGrad.addColorStop(0,'#fff7a0');sunGrad.addColorStop(0.5,'#ffd700');sunGrad.addColorStop(1,'rgba(255,200,0,0)');
-    farmCtx.fillStyle=sunGrad;farmCtx.beginPath();farmCtx.arc(sx,sy,22,0,Math.PI*2);farmCtx.fill();
-  } else {
-    farmCtx.fillStyle='rgba(220,220,255,0.9)';farmCtx.beginPath();farmCtx.arc(W*0.82,H*0.12,10,0,Math.PI*2);farmCtx.fill();
+/* Colors always in sync with current theme via CSS variables */
+const _cv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const C = new Proxy({},{
+  get(_,k){
+    const m={bg:'--bg',surf:'--surf',surf2:'--surf2',surf3:'--surf3',
+      brd:'--brd',brdL:'--brdL',txt:'--txt',txtS:'--txtS',txtF:'--txtF',
+      acc:'--acc',burg:'--burg',burgL:'--burgL'};
+    return m[k]?_cv(m[k]):'#888';
   }
-  // Isometric projection helpers
-  // Convert isometric coords to screen
-  // iso origin at bottom-center
-  const TILE_W=W*0.13, TILE_H=W*0.065;
-  const originX=W*0.5, originY=H*0.88;
-  const isoX=(gx,gy)=>originX+(gx-gy)*(TILE_W*0.5);
-  const isoY=(gx,gy)=>originY+(gx+gy)*(TILE_H*0.5);
-  // Draw ground tiles
-  for(let gx=0;gx<4;gx++){
-    for(let gy=0;gy<2;gy++){
-      const px=gx*2.2-3.3, py=gy*2.4-1.2;
-      const tx0=isoX(px,py),ty0=isoY(px,py);
-      const tx1=isoX(px+2,py),ty1=isoY(px+2,py);
-      const tx2=isoX(px+2,py+2.2),ty2=isoY(px+2,py+2.2);
-      const tx3=isoX(px,py+2.2),ty3=isoY(px,py+2.2);
-      farmCtx.fillStyle=gy%2===0?'#ccc0a0':'#c4b898';
-      farmCtx.beginPath();farmCtx.moveTo(tx0,ty0);farmCtx.lineTo(tx1,ty1);farmCtx.lineTo(tx2,ty2);farmCtx.lineTo(tx3,ty3);farmCtx.closePath();farmCtx.fill();
-      farmCtx.strokeStyle='rgba(160,140,100,0.3)';farmCtx.lineWidth=0.5;farmCtx.stroke();
-    }
-  }
-  // Draw paths
-  for(let gx=-3.3;gx<=5;gx+=0.05){
-    // nothing, handled by tiles
-  }
-  // Draw ponds in isometric order (back to front)
-  const isoOrder=[
-    {id:'A-4',gx:3.3,gy:-1.2},{id:'A-3',gx:1.1,gy:-1.2},{id:'A-2',gx:-1.1,gy:-1.2},{id:'A-1',gx:-3.3,gy:-1.2},
-    {id:'B-4',gx:3.3,gy:1.2},{id:'B-3',gx:1.1,gy:1.2},{id:'B-2',gx:-1.1,gy:1.2},{id:'B-1',gx:-3.3,gy:1.2},
-  ];
-  isoOrder.forEach(lc=>{
-    const pd=ponds.find(p=>p.id===lc.id)||{density:.5,status:'healthy',id:lc.id};
-    const isSelected=selPond&&selPond.id===lc.id;
-    const gx=lc.gx, gy=lc.gy;
-    const pw=1.9, pd2=2.0, wallH=0.18;
-    // Pond corners (top face)
-    const tl={x:isoX(gx,gy),y:isoY(gx,gy)};
-    const tr={x:isoX(gx+pw,gy),y:isoY(gx+pw,gy)};
-    const br={x:isoX(gx+pw,gy+pd2),y:isoY(gx+pw,gy+pd2)};
-    const bl={x:isoX(gx,gy+pd2),y:isoY(gx,gy+pd2)};
-    const wallDY=H*wallH*0.18;
-    // LEFT wall (visible side)
-    const lGrad=farmCtx.createLinearGradient(tl.x,tl.y,bl.x,bl.y);
-    lGrad.addColorStop(0,'#d0d4cc');lGrad.addColorStop(1,'#b8bdb4');
-    farmCtx.fillStyle=lGrad;
-    farmCtx.beginPath();
-    farmCtx.moveTo(tl.x,tl.y);farmCtx.lineTo(bl.x,bl.y);
-    farmCtx.lineTo(bl.x,bl.y+wallDY);farmCtx.lineTo(tl.x,tl.y+wallDY);
-    farmCtx.closePath();farmCtx.fill();
-    farmCtx.strokeStyle='rgba(140,145,135,0.4)';farmCtx.lineWidth=0.8;farmCtx.stroke();
-    // FRONT wall
-    const fGrad=farmCtx.createLinearGradient(bl.x,bl.y,br.x,br.y);
-    fGrad.addColorStop(0,'#c8ccC4');fGrad.addColorStop(1,'#d8dcd4');
-    farmCtx.fillStyle=fGrad;
-    farmCtx.beginPath();
-    farmCtx.moveTo(bl.x,bl.y);farmCtx.lineTo(br.x,br.y);
-    farmCtx.lineTo(br.x,br.y+wallDY);farmCtx.lineTo(bl.x,bl.y+wallDY);
-    farmCtx.closePath();farmCtx.fill();farmCtx.stroke();
-    // TOP face (water surface)
-    const waterColor=densityToHex(pd.density,pd.status);
-    farmCtx.save();
-    farmCtx.beginPath();
-    farmCtx.moveTo(tl.x,tl.y);farmCtx.lineTo(tr.x,tr.y);
-    farmCtx.lineTo(br.x,br.y);farmCtx.lineTo(bl.x,bl.y);
-    farmCtx.closePath();farmCtx.clip();
-    farmCtx.fillStyle=waterColor;farmCtx.fill();
-    // Water shimmer
-    const shimmer=isDay?0.18:0.06;
-    farmCtx.strokeStyle=`rgba(255,255,255,${shimmer})`;farmCtx.lineWidth=1.2;
-    for(let wi=0;wi<4;wi++){
-      farmCtx.beginPath();
-      const steps=20;
-      for(let si=0;si<=steps;si++){
-        const t2=si/steps;
-        const wx=tl.x+(tr.x-tl.x)*t2;
-        const wy=tl.y+(tr.y-tl.y)*t2+wi*(bl.y-tl.y)/5;
-        const wave=Math.sin(t2*Math.PI*4+farmAnim*2+wi*1.4)*3;
-        if(si===0)farmCtx.moveTo(wx,wy+wave);
-        else farmCtx.lineTo(wx,wy+wave);
-      }
-      farmCtx.stroke();
-    }
-    // Algae particles
-    const nP=Math.round(6+pd.density*14);
-    for(let pi=0;pi<nP;pi++){
-      const seed=pi*137.5+lc.gx*31+lc.gy*17;
-      const t2=((seed*7919)%1000)/1000;
-      const t3=((seed*6271)%1000)/1000;
-      const ax=tl.x+(tr.x-tl.x)*t2+(bl.x-tl.x)*t3*0.85;
-      const ay=tl.y+(tr.y-tl.y)*t2+(bl.y-tl.y)*t3*0.85;
-      const bob=Math.sin(farmAnim*1.5+seed)*1.5;
-      farmCtx.beginPath();farmCtx.arc(ax,ay+bob,1.2+pd.density*0.7,0,Math.PI*2);
-      farmCtx.fillStyle=`rgba(15,70,25,0.7)`;farmCtx.fill();
-    }
-    // Shade netting
-    farmCtx.strokeStyle='rgba(50,50,50,0.06)';farmCtx.lineWidth=0.7;
-    for(let gi=1;gi<6;gi++){
-      const t2=gi/6;
-      const x1=tl.x+(tr.x-tl.x)*t2,y1=tl.y+(tr.y-tl.y)*t2;
-      const x2=bl.x+(br.x-bl.x)*t2,y2=bl.y+(br.y-bl.y)*t2;
-      farmCtx.beginPath();farmCtx.moveTo(x1,y1);farmCtx.lineTo(x2,y2);farmCtx.stroke();
-    }
-    for(let gi=1;gi<5;gi++){
-      const t2=gi/5;
-      const x1=tl.x+(bl.x-tl.x)*t2,y1=tl.y+(bl.y-tl.y)*t2;
-      const x2=tr.x+(br.x-tr.x)*t2,y2=tr.y+(br.y-tr.y)*t2;
-      farmCtx.beginPath();farmCtx.moveTo(x1,y1);farmCtx.lineTo(x2,y2);farmCtx.stroke();
-    }
-    farmCtx.restore();
-    // Baffle wall inside
-    const bx1=tl.x+(tr.x-tl.x)*0.12,by1=tl.y+(tr.y-tl.y)*0.12;
-    const bx2=bl.x+(br.x-bl.x)*0.12,by2=bl.y+(br.y-bl.y)*0.12;
-    farmCtx.strokeStyle='rgba(180,190,175,0.5)';farmCtx.lineWidth=1.5;
-    farmCtx.beginPath();farmCtx.moveTo(bx1,by1);farmCtx.lineTo(bx2,by2);farmCtx.stroke();
-    // Paddlewheel (left end)
-    const pwx=tl.x+(bl.x-tl.x)*0.5;
-    const pwy=tl.y+(bl.y-tl.y)*0.5;
-    farmCtx.strokeStyle='#4a6a4a';farmCtx.lineWidth=1.5;
-    farmCtx.beginPath();farmCtx.arc(pwx,pwy,5,0,Math.PI*2);farmCtx.stroke();
-    for(let bi=0;bi<4;bi++){
-      const ba=farmAnim*2.5+bi*Math.PI/2;
-      farmCtx.beginPath();farmCtx.moveTo(pwx,pwy);
-      farmCtx.lineTo(pwx+Math.cos(ba)*5,pwy+Math.sin(ba)*4);farmCtx.stroke();
-    }
-    // CO2 pipe (top-right corner)
-    const pipex=tr.x*0.85+tl.x*0.15, pipey=tr.y*0.85+tl.y*0.15-8;
-    farmCtx.strokeStyle='#888888';farmCtx.lineWidth=2;
-    farmCtx.beginPath();farmCtx.moveTo(pipex,pipey-10);farmCtx.lineTo(pipex,pipey);farmCtx.stroke();
-    farmCtx.fillStyle='#999';farmCtx.beginPath();farmCtx.arc(pipex,pipey,2.5,0,Math.PI*2);farmCtx.fill();
-    // Status LED
-    const ledColors={'healthy':'#22c55e','warning':'#f59e0b','critical':'#ef4444'};
-    const ledC=ledColors[pd.status]||'#22c55e';
-    const ledx=tr.x*0.7+tl.x*0.3, ledy=tr.y*0.7+tl.y*0.3-10;
-    const ledAlpha=pd.status==='critical'?0.5+Math.abs(Math.sin(farmAnim*4))*0.5:1;
-    farmCtx.globalAlpha=ledAlpha;
-    farmCtx.shadowBlur=10;farmCtx.shadowColor=ledC;
-    farmCtx.fillStyle=ledC;farmCtx.beginPath();farmCtx.arc(ledx,ledy,5,0,Math.PI*2);farmCtx.fill();
-    farmCtx.shadowBlur=0;farmCtx.globalAlpha=1;
-    // Selection glow
-    if(isSelected){
-      farmCtx.shadowBlur=20;farmCtx.shadowColor='rgba(45,122,64,0.7)';
-      farmCtx.strokeStyle='#2d7a40';farmCtx.lineWidth=2.5;
-      farmCtx.beginPath();
-      farmCtx.moveTo(tl.x,tl.y);farmCtx.lineTo(tr.x,tr.y);
-      farmCtx.lineTo(br.x,br.y);farmCtx.lineTo(bl.x,bl.y);farmCtx.closePath();farmCtx.stroke();
-      farmCtx.shadowBlur=0;
-    }
-    // Pond label on top face
-    const labelX=(tl.x+tr.x+bl.x+br.x)/4;
-    const labelY=(tl.y+tr.y+bl.y+br.y)/4;
-    const fontSize=Math.max(9,Math.min(14,W/80));
-    farmCtx.fillStyle='rgba(255,255,255,0.9)';
-    farmCtx.beginPath();farmCtx.roundRect(labelX-18,labelY-9,36,18,4);farmCtx.fill();
-    farmCtx.fillStyle='#1a4a24';farmCtx.font=`bold ${fontSize}px Inter,sans-serif`;
-    farmCtx.textAlign='center';farmCtx.textBaseline='middle';farmCtx.fillText(lc.id,labelX,labelY);
-    // pH below label
-    const phCol=pd.ph>8.2?'#d97706':pd.ph>8.5?'#dc2626':'#16a34a';
-    farmCtx.fillStyle='rgba(255,255,255,0.85)';
-    farmCtx.beginPath();farmCtx.roundRect(labelX-20,labelY+10,40,12,3);farmCtx.fill();
-    farmCtx.fillStyle=phCol;farmCtx.font=`${Math.max(7,Math.min(10,W/100))}px JetBrains Mono,monospace`;
-    farmCtx.fillText(`pH ${pd.ph?pd.ph.toFixed(2):'—'}`,labelX,labelY+16);
-  });
-}
-
-function init3D(){ initFarm(); }
-function resize3D(){ resizeFarm(); }
-function updateSkyLighting(h){ curHour=h; }
-
-// ══════════════════════════════════════════════════════
-// MINI 2D — monitor cards
-// ══════════════════════════════════════════════════════
-const miniAnimIds={};
-let miniAnim=0;
-
-function buildMini(cid, pd, idx){
-  const canvas=document.getElementById(cid); if(!canvas) return;
-  if(miniAnimIds[cid]) cancelAnimationFrame(miniAnimIds[cid]);
-  const par=canvas.parentElement;
-  const w=par.offsetWidth||280, h=par.offsetHeight||180;
-  canvas.width=Math.max(100,w); canvas.height=Math.max(80,h);
-  canvas.style.width='100%'; canvas.style.height='100%';
-  const ctx=canvas.getContext('2d');
-  const angle=(MINI_ANGLES[idx%8]||{t:.3}).t;
-  let at=angle;
-  function drawMiniPond(){
-    miniAnimIds[cid]=requestAnimationFrame(drawMiniPond);
-    at+=0.01;
-    const W=canvas.width, H=canvas.height;
-    const isDayL=curHour>=6&&curHour<=20;
-    // Sky
-    const skyC=isDayL?'#7ab8e0':'#12123a';
-    ctx.fillStyle=skyC; ctx.fillRect(0,0,W,H*0.35);
-    // Ground
-    const gGrad=ctx.createLinearGradient(0,H*0.35,0,H);
-    gGrad.addColorStop(0,'#c4b494');gGrad.addColorStop(1,'#b0a080');
-    ctx.fillStyle=gGrad; ctx.fillRect(0,H*0.35,W,H*0.65);
-    // Isometric pond
-    const cx=W*0.5, cy=H*0.62;
-    const iw=W*0.72, id2=H*0.32, wallH=H*0.1;
-    // Tilt angle
-    const tilt=0.42;
-    // 4 corners of top face
-    const tl={x:cx-iw*0.5,y:cy-id2*0.5};
-    const tr={x:cx+iw*0.5,y:cy-id2*0.5+iw*tilt*0.18};
-    const br={x:cx+iw*0.5,y:cy+id2*0.5+iw*tilt*0.18};
-    const bl={x:cx-iw*0.5,y:cy+id2*0.5};
-    // Adjust for isometric look
-    tl.x=cx-iw*0.5; tl.y=cy-id2*0.5-iw*0.12;
-    tr.x=cx+iw*0.5; tr.y=cy-id2*0.5+iw*0.12;
-    br.x=cx+iw*0.5; br.y=cy+id2*0.5+iw*0.12;
-    bl.x=cx-iw*0.5; bl.y=cy+id2*0.5-iw*0.12;
-    // Left wall
-    ctx.fillStyle='#c8ccc4';
-    ctx.beginPath();
-    ctx.moveTo(tl.x,tl.y);ctx.lineTo(bl.x,bl.y);
-    ctx.lineTo(bl.x,bl.y+wallH);ctx.lineTo(tl.x,tl.y+wallH);
-    ctx.closePath();ctx.fill();
-    ctx.strokeStyle='rgba(140,145,135,0.5)';ctx.lineWidth=0.8;ctx.stroke();
-    // Front wall
-    ctx.fillStyle='#d4d8d0';
-    ctx.beginPath();
-    ctx.moveTo(bl.x,bl.y);ctx.lineTo(br.x,br.y);
-    ctx.lineTo(br.x,br.y+wallH);ctx.lineTo(bl.x,bl.y+wallH);
-    ctx.closePath();ctx.fill();ctx.stroke();
-    // Water top face
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(tl.x,tl.y);ctx.lineTo(tr.x,tr.y);
-    ctx.lineTo(br.x,br.y);ctx.lineTo(bl.x,bl.y);
-    ctx.closePath();ctx.clip();
-    const wc=densityToHex(pd.density||0.5,pd.status||'healthy');
-    ctx.fillStyle=wc;ctx.fill();
-    // Waves
-    ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=1.2;
-    for(let wi=0;wi<3;wi++){
-      ctx.beginPath();
-      for(let si=0;si<=20;si++){
-        const t2=si/20;
-        const wx=tl.x+(tr.x-tl.x)*t2;
-        const wy=tl.y+(tr.y-tl.y)*t2+(bl.y-tl.y)*0.2*(1+wi*0.3);
-        const wave=Math.sin(t2*Math.PI*3+at*2+wi*1.5)*2.5;
-        if(si===0)ctx.moveTo(wx,wy+wave);
-        else ctx.lineTo(wx,wy+wave);
-      }
-      ctx.stroke();
-    }
-    // Algae dots
-    const nP=Math.round(5+(pd.density||0.5)*12);
-    for(let pi=0;pi<nP;pi++){
-      const seed=pi*137.5+idx*50;
-      const t2=((seed*7919)%1000)/1000, t3=((seed*6271)%1000)/1000;
-      const ax=tl.x+(tr.x-tl.x)*t2+(bl.x-tl.x)*t3*0.8;
-      const ay=tl.y+(tr.y-tl.y)*t2+(bl.y-tl.y)*t3*0.8;
-      const bob=Math.sin(at*1.5+seed)*1.5;
-      ctx.beginPath();ctx.arc(ax,ay+bob,1.2+(pd.density||0.5)*0.8,0,Math.PI*2);
-      ctx.fillStyle='rgba(15,70,25,0.7)';ctx.fill();
-    }
-    // Grid
-    ctx.strokeStyle='rgba(50,50,50,0.07)';ctx.lineWidth=0.6;
-    for(let gi=1;gi<5;gi++){
-      const t2=gi/5;
-      ctx.beginPath();
-      ctx.moveTo(tl.x+(tr.x-tl.x)*t2,tl.y+(tr.y-tl.y)*t2);
-      ctx.lineTo(bl.x+(br.x-bl.x)*t2,bl.y+(br.y-bl.y)*t2);ctx.stroke();
-    }
-    ctx.restore();
-    // Paddlewheel
-    const pwx2=tl.x+(bl.x-tl.x)*0.5, pwy2=tl.y+(bl.y-tl.y)*0.5;
-    ctx.strokeStyle='#4a6a4a';ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.arc(pwx2,pwy2,5,0,Math.PI*2);ctx.stroke();
-    for(let bi=0;bi<4;bi++){
-      const ba=at*3+bi*Math.PI/2;
-      ctx.beginPath();ctx.moveTo(pwx2,pwy2);ctx.lineTo(pwx2+Math.cos(ba)*5,pwy2+Math.sin(ba)*4.5);ctx.stroke();
-    }
-    // Status LED
-    const lc2={'healthy':'#22c55e','warning':'#f59e0b','critical':'#ef4444'};
-    const ledC2=lc2[pd.status]||'#22c55e';
-    ctx.shadowBlur=8;ctx.shadowColor=ledC2;
-    ctx.fillStyle=ledC2;ctx.beginPath();ctx.arc(tr.x-8,tr.y-8,4,0,Math.PI*2);ctx.fill();
-    ctx.shadowBlur=0;
-    // Shade netting posts
-    ctx.strokeStyle='#8b6347';ctx.lineWidth=2;
-    const postH=H*0.25;
-    [[tl.x,tl.y],[tr.x,tr.y]].forEach(([px2,py2])=>{
-      ctx.beginPath();ctx.moveTo(px2,py2);ctx.lineTo(px2,py2-postH);ctx.stroke();
-      // cross beam
-      ctx.strokeStyle='rgba(100,70,40,0.5)';ctx.lineWidth=1;
-    });
-    ctx.beginPath();ctx.moveTo(tl.x,tl.y-postH);ctx.lineTo(tr.x,tr.y-postH);
-    ctx.strokeStyle='rgba(100,70,40,0.4)';ctx.lineWidth=1;ctx.stroke();
-    // Shade net (semi-transparent)
-    ctx.fillStyle='rgba(50,50,50,0.04)';
-    ctx.beginPath();
-    ctx.moveTo(tl.x,tl.y-postH);ctx.lineTo(tr.x,tr.y-postH);
-    ctx.lineTo(tr.x,tr.y);ctx.lineTo(tl.x,tl.y);
-    ctx.closePath();ctx.fill();
-    // Net lines
-    ctx.strokeStyle='rgba(50,50,50,0.08)';ctx.lineWidth=0.6;
-    for(let gi=1;gi<6;gi++){
-      const t2=gi/6;
-      const nx=tl.x+(tr.x-tl.x)*t2;
-      const ny1=tl.y+(tr.y-tl.y)*t2-postH;
-      const ny2=tl.y+(tr.y-tl.y)*t2;
-      ctx.beginPath();ctx.moveTo(nx,ny1);ctx.lineTo(nx,ny2);ctx.stroke();
-    }
-    for(let gi=1;gi<4;gi++){
-      const t2=gi/4;
-      const ny=tl.y-postH*(1-t2);
-      ctx.beginPath();ctx.moveTo(tl.x,ny);ctx.lineTo(tr.x,ny+(tr.y-tl.y));ctx.stroke();
-    }
-  }
-  drawMiniPond();
-}
-
-const MINI_ANGLES=[{t:.3},{t:.7},{t:-.2},{t:1.1},{t:.5},{t:-.4},{t:.9},{t:1.4}];
-
-// ══════════════════════════════════════════════════════
-// API HELPERS
-// ══════════════════════════════════════════════════════
-async function apiFetch(url){
-  const r = await fetch(url);
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  return r.json();
-}
-
-// ══════════════════════════════════════════════════════
-// POND LIST & KPIs
-// ══════════════════════════════════════════════════════
-function buildPondList(){
-  const el=document.getElementById('pond-list'); if(!el) return;
-  el.innerHTML='';
-  ponds.forEach(p=>{
-    const d=document.createElement('div');
-    d.className='pb'+(selPond&&selPond.id===p.id?' on':'');
-    d.id='pbtn-'+p.id;
-    d.innerHTML=`<div class="pdot" style="background:${scolor(p.status)}"></div>
-      <div><div class="pname">${p.id}</div><div class="pstage">${p.stage} · Day ${p.day}</div></div>
-      <div class="pphval">${p.ph.toFixed(2)}</div>`;
-    d.onclick=()=>selPond_(p);
-    el.appendChild(d);
-  });
-}
-
-function buildKPIs(){
-  const tb=ponds.reduce((a,p)=>a+p.biomass_kg,0).toFixed(0);
-  const tc=ponds.reduce((a,p)=>a+p.co2_captured_kg,0).toFixed(1);
-  const ap=(ponds.reduce((a,p)=>a+p.ph,0)/ponds.length).toFixed(2);
-  const ad=(ponds.reduce((a,p)=>a+p.density,0)/ponds.length).toFixed(2);
-  const el=document.getElementById('kpi-strip'); if(!el) return;
-  el.innerHTML=[
-    {l:'Total Biomass',v:tb,u:'kg',ch:'↑ +12% vs last week',dir:'up'},
-    {l:'CO₂ Captured Today',v:tc,u:'kg',ch:'vs 110 kg target',dir:tc>=100?'up':'w'},
-    {l:'Avg Density',v:ad,u:'g/L',ch:'8 ponds active',dir:'up'},
-    {l:'Avg pH',v:ap,u:'',ch:ap<8.2?'Optimal range':'⚠ Monitor',dir:ap<8.2?'up':'w'},
-  ].map(k=>`<div class="kpi-card"><div class="kl">${k.l}</div>
-    <div class="kv">${k.v}<span class="ku"> ${k.u}</span></div>
-    <div class="kch ${k.dir}">${k.dir==='up'?'↑':'⚠'} ${k.ch}</div>
-  </div>`).join('');
-  const tbEl=document.getElementById('tb'); if(tbEl) tbEl.textContent=tb+' kg';
-  const tcEl=document.getElementById('tc'); if(tcEl) tcEl.textContent=tc+' kg';
-  const tpEl=document.getElementById('tp'); if(tpEl) tpEl.textContent=ap;
-}
-
-// ══════════════════════════════════════════════════════
-// SELECT POND
-// ══════════════════════════════════════════════════════
-function selPond_(p){
-  if(!p) return;
-  selPond=p;
-  // update list
-  document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on'));
-  const btn=document.getElementById('pbtn-'+p.id); if(btn) btn.classList.add('on');
-  // update monitor selection
-  document.querySelectorAll('[id^="mpc-"]').forEach(c=>c.classList.remove('on'));
-  const mc=document.getElementById('mpc-'+p.id); if(mc) mc.classList.add('on');
-  // quick metrics
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('qph',   p.ph.toFixed(2));
-  set('qtemp', p.temperature.toFixed(1)+' °C');
-  set('qco2',  p.co2_flow.toFixed(1)+' m³/h');
-  set('qdens', p.density.toFixed(2)+' g/L');
-  set('qbio',  p.biomass_kg+' kg');
-  set('qdth',  p.days_to_harvest===0?'Harvest now':p.days_to_harvest+' days');
-  // right panel
-  set('rp-name',   p.id);
-  set('rp-stage',  p.stage+' · Day '+p.day+' · Spirulina platensis');
-  const spEl=document.getElementById('rp-status');
-  if(spEl){spEl.textContent=p.status.charAt(0).toUpperCase()+p.status.slice(1);spEl.className='sp '+p.status;}
-  buildParams(p); buildSig(p); buildRecs(p);
-  // update harvest predictor if open
-  const hvSel=document.getElementById('hv-sel');
-  if(hvSel) hvSel.value=p.id;
-  if(document.getElementById('cv-harvest').classList.contains('on')) loadPredChart();
-  // 3D highlight
-  pGroups.forEach(pg=>{
-    if(!pg.userData.wMats) return;
-    pg.userData.wMats.forEach(wm=>{wm.opacity=pg.userData.id===p.id?.98:.88;});
-  });
-}
-
-function buildParams(p){
-  const el=document.getElementById('pgrid'); if(!el) return;
-  const PARAMS=[
-    {l:'pH',v:p.ph.toFixed(2),u:'',tr:p.ph>8.2?'↑ rising':'→ stable',td:p.ph>8.2?'dn':'up',bar:(p.ph-6)/4*100,c:p.ph>8.5?'#dc2626':p.ph>8.2?'#d97706':'#16a34a'},
-    {l:'Temperature',v:p.temperature.toFixed(1),u:'°C',tr:'→ cycle',td:'st',bar:(p.temperature-15)/20*100,c:'#374151'},
-    {l:'CO₂ Flow',v:p.co2_flow.toFixed(1),u:'m³/h',tr:'↑ kiln',td:'up',bar:p.co2_flow/28*100,c:'#374151'},
-    {l:'Density',v:p.density.toFixed(3),u:'g/L',tr:'↑ growing',td:'up',bar:p.density/2.3*100,c:'#374151'},
-    {l:'O₂ Sat.',v:p.o2+'',u:'%',tr:p.o2>104?'↑ high':'→ ok',td:p.o2>104?'dn':'st',bar:p.o2,c:'#374151'},
-    {l:'CO₂ Abs.',v:p.absorption+'',u:'%',tr:p.absorption>80?'↑ good':'↓ check',td:p.absorption>80?'up':'dn',bar:p.absorption,c:p.absorption<60?'#dc2626':'#374151'},
-    {l:'Turbidity',v:p.turbidity.toFixed(2),u:'NTU',tr:'→ normal',td:'st',bar:p.turbidity*60,c:'#374151'},
-    {l:'Salinity',v:p.salinity.toFixed(1),u:'g/L',tr:'→ stable',td:'st',bar:p.salinity/35*100,c:'#374151'},
-    {l:'PAR',v:p.par+'',u:'µmol',tr:p.par>600?'↑ peak':p.par<100?'↓ night':'→',td:p.par>600?'up':p.par<100?'dn':'st',bar:p.par/1200*100,c:'#374151'},
-    {l:'Paddle RPM',v:p.rpm+'',u:'rpm',tr:'→ nominal',td:'st',bar:p.rpm/30*100,c:'#374151'},
-  ];
-  el.innerHTML=PARAMS.map(pp=>`<div class="pc">
-    <div class="pl2">${pp.l}</div>
-    <div><span class="pv" style="color:${pp.c}">${pp.v}</span><span class="pu"> ${pp.u}</span></div>
-    <div class="pt ${pp.td}">${pp.tr}</div>
-    <div class="pbar"><div class="pbf" style="width:${Math.min(100,pp.bar).toFixed(0)}%;background:${pp.c==='#374151'?'#2d7a40':pp.c}"></div></div>
-  </div>`).join('');
-}
-
-function buildSig(p){
-  const sb=document.getElementById('sig-box'); if(!sb) return;
-  const recs=p.recommendations||[];
-  const cls=p.status==='critical'?'crit':p.status==='warning'?'warn':'';
-  sb.className='sig'+(cls?' '+cls:'');
-  const t=sb.querySelector('.sig-title'); if(t) t.className='sig-title'+(cls?' '+cls:'');
-  const txt=document.getElementById('sig-txt'); if(txt) txt.textContent=recs[0]?recs[0].issue:'All parameters nominal.';
-}
-
-function buildRecs(p){
-  const el=document.getElementById('rec-list'); if(!el) return;
-  const rn=document.getElementById('rec-name'); if(rn) rn.textContent=p.id;
-  const pC={'critical':'var(--red)','warning':'var(--amber)','harvest':'#7c3aed','info':'var(--g600)','ok':'var(--g600)'};
-  const pB={'critical':'var(--red-l)','warning':'var(--amber-l)','harvest':'#ede9fe','info':'var(--g50)','ok':'var(--g50)'};
-  const recs=p.recommendations||[];
-  el.innerHTML=recs.map(r=>`<div class="rec-box" style="background:${pB[r.priority]||'var(--g50)'};border-left-color:${pC[r.priority]||'var(--g500)'}">
-    <div style="font-weight:700;font-size:11px;color:${pC[r.priority]||'var(--g700)'};margin-bottom:2px">${r.issue}</div>
-    <div style="font-size:9px;color:var(--t3);font-style:italic;margin:2px 0 5px">${r.cause}</div>
-    ${r.actions.map(a=>`<div style="display:flex;gap:5px;font-size:10px;color:var(--t2);margin-bottom:2px"><span style="color:${pC[r.priority]||'var(--g500)'};flex-shrink:0">→</span>${a}</div>`).join('')}
-    <div style="margin-top:4px;font-size:9px;font-weight:600;color:${pC[r.priority]||'var(--g600)'}">⏱ ${r.timeframe}</div>
-  </div>`).join('');
-}
-
-// ══════════════════════════════════════════════════════
-// ALERTS
-// ══════════════════════════════════════════════════════
-async function buildAlerts(){
-  try{
-    const alerts=await apiFetch('/api/alerts?hour='+curHour);
-    const cnt=alerts.filter(a=>a.type!=='info').length;
-    const ta=document.getElementById('ta'); if(ta) ta.textContent=cnt;
-    const el=document.getElementById('alist'); if(!el) return;
-    el.innerHTML=alerts.map((a,i)=>`<div class="ait ${a.type}" onclick="toggleAlt(${i})">
-      <div class="adot" style="background:${a.type==='critical'?'var(--red)':a.type==='warning'?'var(--amber)':'var(--g300)'}"></div>
-      <div style="flex:1">
-        <div><span class="ap">${a.pond}</span><span class="abadge ${a.type}">${a.type}</span></div>
-        <div class="atxt">${a.text}</div>
-        <div class="atime">${a.time} · tap to expand</div>
-        <div class="aexp" id="ae${i}">
-          <div style="font-size:9px;color:var(--t3);font-style:italic;margin-bottom:4px">${a.recs&&a.recs[0]?a.recs[0].cause:''}</div>
-          ${a.recs&&a.recs[0]?a.recs[0].actions.map(ac=>`<div class="aact">${ac}</div>`).join(''):''}
-          ${a.recs&&a.recs[0]?`<div style="margin-top:4px;font-size:9px;font-weight:600;color:${a.type==='critical'?'var(--red)':'var(--amber)'}">⏱ ${a.recs[0].timeframe}</div>`:''}
-        </div>
-      </div>
-    </div>`).join('');
-  }catch(e){console.warn('alerts failed',e);}
-}
-function toggleAlt(i){const el=document.getElementById('ae'+i);if(el)el.classList.toggle('on');}
-
-// ══════════════════════════════════════════════════════
-// LIVE MONITOR
-// ══════════════════════════════════════════════════════
-function buildMonitor(){
-  const el=document.getElementById('mon-grid'); if(!el) return;
-  el.innerHTML=ponds.map((p,i)=>{
-    const cid='mc3d-'+p.id;
-    return `<div class="mpc${selPond&&selPond.id===p.id?' on':''}" id="mpc-${p.id}" onclick="selPond_(ponds.find(x=>x.id==='${p.id}'))">
-      <div class="mpc3d"><canvas id="${cid}" style="width:100%;height:100%;display:block"></canvas></div>
-      <div class="mpcbot">
-        <div class="mpchdr">
-          <div class="mpcname">${p.id}</div>
-          <div class="sp ${p.status}">${p.status}</div>
-        </div>
-        <div class="mpcparams">
-          <div class="mpcp"><div class="mpcpl">pH</div><div class="mpcpv" style="color:${p.ph>8.2?'#d97706':'#111'}">${p.ph.toFixed(2)}</div></div>
-          <div class="mpcp"><div class="mpcpl">Temp</div><div class="mpcpv">${p.temperature.toFixed(1)}°</div></div>
-          <div class="mpcp"><div class="mpcpl">Dens.</div><div class="mpcpv">${p.density.toFixed(2)}</div></div>
-          <div class="mpcp"><div class="mpcpl">CO₂</div><div class="mpcpv">${p.co2_flow.toFixed(1)}</div></div>
-          <div class="mpcp"><div class="mpcpl">O₂%</div><div class="mpcpv">${p.o2}</div></div>
-          <div class="mpcp"><div class="mpcpl">Day</div><div class="mpcpv">${p.day}</div></div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-  // Wait for grid cells to have actual dimensions before building 3D
-  setTimeout(()=>{
-    ponds.forEach((p,i)=>{
-      const cid='mc3d-'+p.id;
-      // Force canvas parent to have height
-      const c=document.getElementById(cid);
-      if(c&&c.parentElement){
-        const par=c.parentElement;
-        if(par.offsetHeight<10){
-          par.style.minHeight='150px';
-          par.style.height='150px';
-        }
-      }
-      buildMini(cid,p,i);
-    });
-  },300);
-}
-
-// ══════════════════════════════════════════════════════
-// CO2 OPTIMIZER
-// ══════════════════════════════════════════════════════
-async function buildCO2(){
-  try{
-    const data=await apiFetch('/api/co2opt?hour='+curHour);
-    document.getElementById('co2-rows').innerHTML=data.ponds.map(r=>{
-      const pc=Math.min(100,r.co2_flow/28*100), pr=Math.min(100,r.recommended/28*100);
-      const cls=r.change_pct>2?'up':r.change_pct<-2?'dn':'st';
-      const chg=r.change_pct>2?`+${r.change_pct.toFixed(0)}%`:r.change_pct<-2?`${r.change_pct.toFixed(0)}%`:'→ OK';
-      return `<div class="co2row" id="co2r-${r.id}" onclick="showCO2Detail('${r.id}')">
-        <div class="co2rn">${r.id}</div><div class="co2rdot" style="background:${scolor(r.status)}"></div>
-        <div class="co2tw">
-          <div class="co2tr"><div class="co2tf" style="width:${pc.toFixed(0)}%;background:#93c4a0"></div></div>
-          <div class="co2tr"><div class="co2tf" style="width:${pr.toFixed(0)}%;background:#2d7a40"></div></div>
-          <div class="co2tl"><span style="color:#9ca3af">Cur: ${r.co2_flow.toFixed(1)}</span><span style="color:#2d7a40">Rec: ${r.recommended.toFixed(1)}</span></div>
-        </div>
-        <div class="co2chg ${cls}">${chg}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);width:66px;text-align:right">${r.recommended.toFixed(1)} m³/h</div>
-      </div>`;
-    }).join('');
-    mkChart('co2-chart',{type:'bar',data:{labels:data.ponds.map(r=>r.id),datasets:[
-      {label:'Current (m³/h)',data:data.ponds.map(r=>r.co2_flow),backgroundColor:'#93c4a0',borderRadius:3},
-      {label:'AI Recommended',data:data.ponds.map(r=>r.recommended),backgroundColor:'#2d7a40',borderRadius:3},
-    ]},options:{...CD}});
-    mkChart('co2-abs-chart',{type:'bar',data:{labels:data.ponds.map(r=>r.id),datasets:[
-      {label:'Absorption %',data:data.ponds.map(r=>r.absorption),borderRadius:4,
-       backgroundColor:data.ponds.map(r=>r.absorption<60?'#fca5a5':r.absorption<75?'#fcd34d':'#86efac')}
-    ]},options:{...CD,scales:{...CD.scales,y:{...CD.scales.y,min:0,max:100}}}});
-    if(data.ponds.length>0) showCO2Detail(data.ponds[0].id);
-  }catch(e){console.warn('CO2 failed',e);}
-}
-
-async function showCO2Detail(id){
-  document.querySelectorAll('.co2row').forEach(r=>r.classList.remove('on'));
-  const row=document.getElementById('co2r-'+id); if(row) row.classList.add('on');
-  const pd=ponds.find(p=>p.id===id)||{};
-  const data=await apiFetch('/api/co2opt?hour='+curHour);
-  const r=data.ponds.find(p=>p.id===id)||{};
-  const cc=r.change_pct>2?'var(--g500)':r.change_pct<-2?'var(--amber)':'var(--t4)';
-  const ct=r.change_pct>2?`+${(r.change_pct||0).toFixed(1)}%`:r.change_pct<-2?`${(r.change_pct||0).toFixed(1)}%`:'Optimal';
-  const recs=pd.recommendations||[];
-  document.getElementById('co2-det').innerHTML=`
-    <div style="font-size:26px;font-weight:700;color:var(--t1);margin-bottom:2px">${id}</div>
-    <div style="font-size:10px;color:var(--t3);margin-bottom:12px">${pd.stage||'—'} · Day ${pd.day||'—'} · Spirulina platensis</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      ${[['Current Flow',(r.co2_flow||0).toFixed(1)+' m³/h',''],['AI Recommended',(r.recommended||0).toFixed(1)+' m³/h','color:var(--g600)'],
-         ['Change Required',ct,'color:'+cc],['Absorption %',(pd.absorption||'—')+'%',''],
-         ['Current pH',(pd.ph||'—').toString(),'color:'+(pd.ph>8.2?'#d97706':'var(--t1)')],['Growth Factor',(pd.growth_factor||'—')+'','']
-        ].map(([l,v,s])=>`<div style="background:var(--card2);border:1px solid var(--bd);border-radius:6px;padding:8px">
-          <div style="font-size:8px;color:var(--t4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">${l}</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;${s}">${v}</div>
-        </div>`).join('')}
-    </div>
-    <div style="background:var(--g50);border:1px solid var(--g200);border-radius:var(--r);padding:10px">
-      <div style="font-size:9px;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">AI Recommendations</div>
-      ${recs.slice(0,2).map(rec=>`<div style="margin-bottom:6px">
-        <div style="font-size:10px;font-weight:600;color:${rec.priority==='critical'?'var(--red)':rec.priority==='warning'?'var(--amber)':'var(--g600)'};margin-bottom:2px">${rec.issue}</div>
-        <div style="font-size:9px;color:var(--t3);font-style:italic;margin-bottom:3px">${rec.cause}</div>
-        ${rec.actions.slice(0,2).map(a=>`<div style="font-size:10px;color:var(--t2);display:flex;gap:4px;margin-bottom:2px"><span style="color:var(--g500)">→</span>${a}</div>`).join('')}
-      </div>`).join('')}
-    </div>`;
-}
-
-// ══════════════════════════════════════════════════════
-// HARVEST PREDICTOR
-// ══════════════════════════════════════════════════════
-function populateHvSel(){
-  const sel=document.getElementById('hv-sel'); if(!sel) return;
-  sel.innerHTML=ponds.map(p=>`<option value="${p.id}"${selPond&&selPond.id===p.id?' selected':''}>${p.id} — Day ${p.day} · ${p.stage}</option>`).join('');
-}
-
-async function loadPredChart(){
-  const id=document.getElementById('hv-sel')?.value||'A-2';
-  const pd=ponds.find(p=>p.id===id)||{};
-  const col=pcolor(id);
-  try{
-    const data=await apiFetch('/api/predict/'+id);
-    document.getElementById('pred-title').textContent='Growth Curve — Pond '+id;
-    const hv_name=document.getElementById('hv-name'); if(hv_name) hv_name.textContent=id;
-    const hv_stage=document.getElementById('hv-stage'); if(hv_stage) hv_stage.textContent=(pd.stage||'—')+' · Day '+(pd.day||'—');
-    const hv_sig=document.getElementById('hv-signal'); if(hv_sig){
-      const recs=pd.recommendations||[]; const r=recs[0]||{};
-      hv_sig.textContent=(r.issue||'—')+(r.actions?'\n• '+r.actions.slice(0,2).join('\n• '):'');
-    }
-    const dth=pd.days_to_harvest||0; const grade=pd.grade||'A';
-    const bdg=document.getElementById('pred-badges'); if(bdg){
-      bdg.innerHTML=[
-        {l:'Peak Window',v:dth<1?'NOW':dth.toFixed(1)+' d',c:'#2d7a40'},
-        {l:'Confidence',v:'91%',c:'#1d4ed8'},
-        {l:'Grade',v:grade,c:grade==='A'?'#16a34a':grade==='A-'?'#d97706':'#dc2626'},
-        {l:'Est. Yield',v:pd.biomass_kg?pd.biomass_kg.toFixed(0)+' kg':'—',c:'#374151'},
-      ].map(b=>`<div style="padding:4px 9px;border-radius:5px;background:${b.c}18;border:1px solid ${b.c}40;text-align:center;min-width:68px">
-        <div style="font-size:7px;color:${b.c};text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px">${b.l}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:${b.c}">${b.v}</div>
-      </div>`).join('');
-    }
-    mkChart('pred-chart',{data:{labels:data.series.map(r=>r.label),datasets:[
-      {type:'line',label:'Historical',data:data.series.map(r=>r.past),borderColor:col,borderWidth:2.5,pointRadius:3,pointBackgroundColor:col,tension:.4,fill:false},
-      {type:'line',label:'AI Prediction',data:data.series.map(r=>r.pred),borderColor:col,borderWidth:2,borderDash:[6,4],pointRadius:2,tension:.4,fill:false},
-      {type:'line',label:'90% Upper',data:data.series.map(r=>r.upper),borderColor:col+'44',borderWidth:1,pointRadius:0,tension:.4,fill:'+1',backgroundColor:col+'14'},
-      {type:'line',label:'90% Lower',data:data.series.map(r=>r.lower),borderColor:col+'44',borderWidth:1,pointRadius:0,tension:.4,fill:false},
-    ]},options:{...CD,scales:{...CD.scales,y:{...CD.scales.y,title:{display:true,text:'Density (g/L)',color:'#6b7280',font:{size:9}},min:0}}}});
-    // sub charts
-    const hrs=Array.from({length:25},(_,i)=>i+':00');
-    const parV=hrs.map((_,i)=>Math.max(0,1150*Math.exp(-Math.pow((i-13)/3.8,2))));
-    const co2v=pd.co2_flow||18;
-    const gfV=hrs.map((_,i)=>{
-      const l=parV[i],t=23.5+4.5*Math.cos((i-14.5)*Math.PI/12);
-      const ph2=7.62-0.28*Math.min(1,co2v/20)+0.065*(l/100)*(pd.density||0.5);
-      const lf=l>0?Math.min(1,l/800):.03;
-      const tf=t<25?Math.max(0,(t-15)/10):t>35?Math.max(0,1-(t-35)*.15):1;
-      const pf=ph2<7.4?Math.max(0,.6+(ph2-7.4)*.4):ph2>8.4?Math.max(0,1-(ph2-8.4)*.4):1;
-      return +(lf*tf*pf*Math.min(1,co2v/14)).toFixed(3);
-    });
-    const mini={...CD,plugins:{legend:{display:false}},scales:{x:{...CD.scales.x,ticks:{...CD.scales.x.ticks,maxTicksLimit:5}},y:{...CD.scales.y}}};
-    mkChart('par-chart',{type:'line',data:{labels:hrs.filter((_,i)=>i%3===0),datasets:[{label:'PAR',data:parV.filter((_,i)=>i%3===0),borderColor:'#d97706',borderWidth:2,pointRadius:0,fill:true,backgroundColor:'rgba(217,119,6,.1)',tension:.4}]},options:{...mini,scales:{...mini.scales,y:{...mini.scales.y,title:{display:true,text:'PAR',color:'#9ca3af',font:{size:8}}}}}});
-    mkChart('gf-chart',{type:'line',data:{labels:hrs.filter((_,i)=>i%3===0),datasets:[{label:'GF',data:gfV.filter((_,i)=>i%3===0),borderColor:col,borderWidth:2,pointRadius:0,fill:true,backgroundColor:col+'18',tension:.4}]},options:{...mini,scales:{...mini.scales,y:{...mini.scales.y,min:0,max:1.05,title:{display:true,text:'GF',color:'#9ca3af',font:{size:8}}}}}});
-  }catch(e){console.warn('predict failed',e);}
-  // calendar & weather (static)
-  const hvcal=document.getElementById('hv-cal');
-  if(hvcal){
-    const items=[{id:'B-2',u:'critical',w:'Today 18:00–20:00',g:'B+',y:163,c:'#dc2626'},{id:'A-2',u:'optimal',w:'Tomorrow 14:00–18:00',g:'A',y:187,c:'#16a34a'},{id:'A-3',u:'soon',w:'Tomorrow 08:00–12:00',g:'A-',y:201,c:'#d97706'},{id:'B-1',u:'upcoming',w:'Mar 19 10:00–14:00',g:'A',y:175,c:'#6b7280'},{id:'A-1',u:'upcoming',w:'Mar 20 08:00–12:00',g:'A',y:158,c:'#6b7280'}];
-    const ul={critical:'URGENT',optimal:'OPTIMAL',soon:'SOON',upcoming:'SCHED'};
-    hvcal.innerHTML=items.map(h=>`<div class="hvcal" onclick="document.getElementById('hv-sel').value='${h.id}';loadPredChart()">
-      <div style="width:3px;border-radius:2px;align-self:stretch;flex-shrink:0;background:${h.c}"></div>
-      <div style="flex:1"><div style="font-weight:600;font-size:12px">${h.id}</div><div style="font-size:9px;color:var(--t3)">${h.w}</div>
-        <div style="display:flex;gap:5px;margin-top:2px;align-items:center">
-          <div style="font-size:9px;padding:1px 5px;border-radius:3px;background:${h.c}20;color:${h.c};font-weight:600">Grade ${h.g}</div>
-          <div style="font-size:9px;color:var(--t3)">~${h.y} kg</div>
-          <div style="margin-left:auto;font-size:8px;color:${h.c};font-weight:700">${ul[h.u]}</div>
-        </div>
-      </div>
-    </div>`).join('');
-  }
-  const hvwx=document.getElementById('hv-wx');
-  if(hvwx){
-    const days=['Today','Tomorrow','Wed','Thu','Fri'],icons=['☀️','⛅','☀️','🌤','☀️'],pars=[1050,820,1080,940,1100];
-    hvwx.innerHTML=days.map((d,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bd)"><span style="font-size:10px;font-weight:500">${d}</span><span style="font-size:12px">${icons[i]}</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3)">${pars[i]} µmol</span><span style="font-size:8px;color:${pars[i]>900?'#16a34a':'#d97706'};font-weight:600">${pars[i]>900?'Good':'Mod'}</span></div>`).join('');
-  }
-}
-
-// ══════════════════════════════════════════════════════
-// SIMULATION LAB
-// ══════════════════════════════════════════════════════
-let simDeb=null;
-function simUpdate(){
-  const hour=parseFloat(document.getElementById('sr-time').value);
-  const toff=parseFloat(document.getElementById('sr-temp').value);
-  const cloud=parseInt(document.getElementById('sr-cloud').value);
-  const co2=parseFloat(document.getElementById('sr-co2').value);
-  const rpm=parseInt(document.getElementById('sr-rpm').value);
-  const pond=document.getElementById('sim-sel').value;
-  const fh=h=>`${Math.floor(h).toString().padStart(2,'0')}:${Math.round((h%1)*60).toString().padStart(2,'0')}`;
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('sv-time',fh(hour));set('sv-temp',(toff>=0?'+':'')+toff.toFixed(1)+'°C');
-  set('sv-cloud',cloud+'%');set('sv-co2',co2.toFixed(1)+' m³/h');set('sv-rpm',rpm+' RPM');
-  const pd=ponds.find(p=>p.id===pond);
-  const set2=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set2('sc-gf-sub', pond+' · Day '+(pd?pd.day:'—')+' · '+(pd?pd.stage:'—'));
-  set2('sc-ph-sub', 'CO₂: '+co2.toFixed(1)+' m³/h · Offset: '+(toff>=0?'+':'')+toff.toFixed(1)+'°C');
-  set2('sc-tp-sub', 'Cloud: '+cloud+'%'+(cloud>0?' · PAR -'+cloud+'%':''));
-  if(simDeb) clearTimeout(simDeb);
-  simDeb=setTimeout(()=>runSim(pond,co2,toff,cloud,rpm),180);
-}
-
-async function runSim(pond,co2,toff,cloud,rpm){
-  try{
-    const data=await apiFetch(`/api/simulate?pond=${pond}&co2=${co2}&toff=${toff}&cloud=${cloud}`);
-    const hrs=data.hours.map(h=>`${h.toString().padStart(2,'0')}:00`);
-    const cf=1-cloud/100;
-    const pars=data.par.map(v=>+(v*cf).toFixed(0));
-    const gfs=data.hours.map((_,i)=>{
-      const l=pars[i],t=data.temperature[i],ph=data.ph[i];
-      const lf=l>0?Math.min(1,l/800):.03;
-      const tf=t<25?Math.max(0,(t-15)/10):t>35?Math.max(0,1-(t-35)*.15):1;
-      const pf=ph<7.4?Math.max(0,.6+(ph-7.4)*.4):ph>8.4?Math.max(0,1-(ph-8.4)*.4):1;
-      return +(lf*tf*pf*Math.min(1,co2/14)).toFixed(4);
-    });
-    const hi=Math.min(24,Math.round(parseFloat(document.getElementById('sr-time').value)));
-    const curPH=data.ph[hi],curT=data.temperature[hi],curGF=gfs[hi],curO2=data.o2[hi];
-    const col=pcolor(pond);
-    // KPI bar
-    document.getElementById('sim-kpis').innerHTML=[
-      {l:'pH Now',v:curPH.toFixed(2),ok:curPH<8.2,warn:curPH<8.5,s:curPH<8.2?'Optimal':curPH<8.5?'Monitor':'⚠ Stress'},
-      {l:'Temp Now',v:curT.toFixed(1)+'°C',ok:curT<28,warn:curT<32,s:curT<28?'Optimal':curT<32?'Warm':'⚠ Hot'},
-      {l:'Growth Factor',v:(curGF*100).toFixed(0)+'%',ok:curGF>.7,warn:curGF>.4,s:curGF>.7?'High':curGF>.4?'Mod':'Low'},
-      {l:'O₂ Sat.',v:curO2.toFixed(0)+'%',ok:curO2<105,warn:curO2<112,s:curO2<105?'Normal':curO2<112?'High':'⚠ Super-sat'},
-    ].map(r=>{const c=r.ok?'#16a34a':r.warn?'#d97706':'#dc2626';const bg=r.ok?'#f0fdf4':r.warn?'#fffbeb':'#fef2f2';
-      return `<div class="skpi" style="background:${bg};border-color:${c}22"><div class="skl" style="color:${c}">${r.l}</div><div class="skv" style="color:${c}">${r.v}</div><div class="sks" style="color:${c}">${r.s}</div></div>`;
-    }).join('');
-    const rm=document.getElementById('sim-risk');
-    if(rm) rm.innerHTML=`<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${curPH>8.5||curT>30||curGF<.3?'#d97706':'#16a34a'};margin-bottom:3px">Risk — Pond ${pond}</div>${
-      curPH>8.5?`⚠ pH ${curPH.toFixed(2)} above threshold. Increase CO₂ to ${(co2*1.3).toFixed(1)} m³/h.`:
-      curT>30?`⚠ Temperature ${curT.toFixed(1)}°C high. Deploy shade netting.`:
-      curGF<.3?`⚠ Growth factor ${(curGF*100).toFixed(0)}% — very limited. Check CO₂/light.`:
-      cloud>60?`☁ Cloud -${cloud}% PAR — growth limited. Normal for overcast.`:
-      `✓ Parameters optimal for Pond ${pond} at these settings.`}`;
-    const xl={...CD.scales.x,ticks:{...CD.scales.x.ticks,maxTicksLimit:8}};
-    mkChart('sc-ph',{type:'line',data:{labels:hrs,datasets:[
-      {label:`pH — ${pond}`,data:data.ph,borderColor:col,borderWidth:2,pointRadius:0,fill:true,backgroundColor:col+'14',tension:.5},
-      {label:'Max optimal (8.2)',data:hrs.map(()=>8.2),borderColor:'rgba(217,119,6,.5)',borderDash:[4,4],borderWidth:1,pointRadius:0},
-      {label:'Stress (8.5)',data:hrs.map(()=>8.5),borderColor:'rgba(220,38,38,.4)',borderDash:[3,3],borderWidth:1,pointRadius:0},
-    ]},options:{...CD,plugins:{legend:{labels:{color:'#6b7280',font:{size:9},boxWidth:8,padding:5}}},scales:{x:xl,y:{...CD.scales.y,min:6.5,max:9.5}}}});
-    mkChart('sc-gf',{type:'line',data:{labels:hrs,datasets:[{label:`Growth Factor — ${pond} (Day ${data.day})`,data:gfs,borderColor:col,borderWidth:2,pointRadius:0,fill:true,backgroundColor:col+'18',tension:.5}]},options:{...CD,plugins:{legend:{labels:{color:'#6b7280',font:{size:9},boxWidth:8,padding:5}}},scales:{x:xl,y:{...CD.scales.y,min:0,max:1.05}}}});
-    mkChart('sc-tp',{data:{labels:hrs,datasets:[
-      {type:'line',label:'Temperature (°C)',data:data.temperature,borderColor:'#dc2626',borderWidth:2,pointRadius:0,tension:.5,yAxisID:'y'},
-      {type:'bar',label:'PAR÷10',data:pars.map(v=>v/10),backgroundColor:'rgba(217,119,6,.2)',borderColor:'rgba(217,119,6,.4)',borderWidth:1,yAxisID:'y2'},
-    ]},options:{...CD,plugins:{legend:{labels:{color:'#6b7280',font:{size:9},boxWidth:8,padding:5}}},scales:{x:xl,y:{...CD.scales.y,position:'left',title:{display:true,text:'Temp°C',color:'#9ca3af',font:{size:9}}},y2:{grid:{display:false},ticks:{color:'#d97706',font:{size:9}},position:'right'}}}});
-    mkChart('sc-o2',{data:{labels:hrs,datasets:[
-      {type:'line',label:'O₂ %',data:data.o2,borderColor:'#1d4ed8',borderWidth:2,pointRadius:0,tension:.5},
-      {type:'line',label:'CO₂ Abs %',data:data.co2_absorption,borderColor:col,borderWidth:2,borderDash:[5,4],pointRadius:0,tension:.5},
-    ]},options:{...CD,plugins:{legend:{labels:{color:'#6b7280',font:{size:9},boxWidth:8,padding:5}}},scales:{x:xl,y:{...CD.scales.y,min:0,max:120}}}});
-  }catch(e){console.warn('sim failed',e);}
-}
-
-// ══════════════════════════════════════════════════════
-// CARBON
-// ══════════════════════════════════════════════════════
-async function buildCarbon(){
-  try{
-    const data=await apiFetch('/api/carbon?hour='+curHour);
-    const el=document.getElementById('ck-today'); if(el) el.textContent=data.today.toFixed(1)+' kg';
-    mkChart('carb-chart',{data:{labels:data.history.map(d=>d.day),datasets:[
-      {type:'bar',label:'CO₂ Captured (kg)',data:data.history.map(d=>d.captured),backgroundColor:'rgba(45,122,64,.45)',borderColor:'#2d7a40',borderWidth:1,borderRadius:3},
-      {type:'line',label:'Target 110 kg',data:data.history.map(d=>d.target),borderColor:'#d97706',borderDash:[5,4],borderWidth:1.5,pointRadius:0,tension:.4},
-    ]},options:{...CD,scales:{...CD.scales,y:{...CD.scales.y,title:{display:true,text:'kg CO₂',color:'#6b7280',font:{size:9}}}}}});
-    const tbl=document.getElementById('carb-table');
-    if(tbl) tbl.innerHTML=`<table><thead><tr>${['Pond','CO₂ kg','Biomass','Abs','Grade','Status'].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${data.ponds.map((r,i)=>`<tr style="${i%2?'background:var(--card2)':''}"><td style="font-weight:700">${r.id}</td><td style="font-family:'JetBrains Mono',monospace">${r.co2_today}</td><td style="font-family:'JetBrains Mono',monospace">${r.biomass} kg</td><td style="font-family:'JetBrains Mono',monospace">${r.absorption}%</td><td style="font-weight:600;color:${r.grade==='A'?'#16a34a':r.grade==='A-'?'#d97706':'#dc2626'}">${r.grade}</td><td><span class="sp ${r.status}" style="font-size:8px;padding:2px 5px">${r.status}</span></td></tr>`).join('')}</tbody></table>`;
-  }catch(e){console.warn('carbon failed',e);}
-}
-
-// ══════════════════════════════════════════════════════
-// BRIEFING
-// ══════════════════════════════════════════════════════
-async function buildBriefing(){
-  try{
-    const alerts=await apiFetch('/api/alerts?hour='+curHour);
-    const crit=alerts.filter(a=>a.type==='critical'), warn=alerts.filter(a=>a.type==='warning');
-    // KPIs
-    const bk=document.getElementById('brief-kpis');
-    if(bk) bk.innerHTML=[
-      {l:'Site Status',v:crit.length?'⚠ Critical':'✓ Normal',c:crit.length?'var(--red)':'var(--g600)',s:crit.length+' critical · '+warn.length+' warnings'},
-      {l:'Ponds to Harvest',v:'3',c:'var(--amber)',s:'B-2 urgent, A-2+A-3 soon'},
-      {l:'7-Day Yield',v:'1,054 kg',c:'var(--g600)',s:'Grade A × 3 · Grade B × 1'},
-      {l:'CO₂ Forecast',v:'712 kg',c:'var(--g600)',s:'7-day · 37 t/yr annualized'},
-    ].map(k=>`<div class="bkpi"><div class="bkl">${k.l}</div><div class="bkv" style="color:${k.c}">${k.v}</div><div class="bks">${k.s}</div></div>`).join('');
-    const item=(h,b,c='var(--t1)',bl='var(--bd)')=>`<div class="bitem" style="border-left:3px solid ${bl}"><div class="bih" style="color:${c}">${h}</div><div class="bib">${b}</div></div>`;
-    const shdr=(t,badge,bc)=>`<div class="bshdr"><div class="bst">${t}</div>${badge?`<div style="font-size:8px;font-weight:600;padding:2px 7px;border-radius:20px;background:${bc||'var(--g100)'};color:${bc?'#fff':'var(--g600)'}">${badge}</div>`:''}</div>`;
-    let html=`<div class="bsect full">${shdr('Immediate Actions',crit.length?crit.length+' CRITICAL':'All Clear',crit.length?'#dc2626':'')}<div class="bbody">
-      ${crit.map(a=>{const r=a.recs&&a.recs[0];return item(`🚨 Pond ${a.pond} — ${a.text}`,r?`<strong>Cause:</strong> ${r.cause}<br>${r.actions.join(' · ')}<br><strong>⏱</strong> ${r.timeframe}`:'','var(--red)','var(--red)');}).join('')}
-      ${warn.map(a=>{const r=a.recs&&a.recs[0];return item(`⚠ Pond ${a.pond} — ${a.text}`,r?`${r.cause}<br>${r.actions.join(' · ')}`:'','var(--amber)','var(--amber)');}).join('')}
-      ${!crit.length&&!warn.length?item('✓ No critical actions','All 8 ponds within acceptable parameters.','var(--g500)','var(--g300)'):''}
-    </div></div>`;
-    html+=`<div class="bsect full">${shdr('Per-Pond Status & Recommendations')}<div class="bbody">
-      ${ponds.map(p=>{const recs=p.recommendations||[];const r=recs[0]||{};const sc2=scolor(p.status);
-        return `<div class="bprow"><div class="bpid">${p.id}</div>
-          <div class="bpd"><strong>${p.stage} · Day ${p.day}</strong> · pH ${p.ph.toFixed(2)} · ${p.temperature.toFixed(1)}°C · ${p.density.toFixed(2)} g/L<br>
-            <span style="color:var(--t3)">${r.issue||'Operating normally.'}</span>
-            ${r.actions&&r.actions.length?`<br><span style="color:var(--g600)">→ ${r.actions[0]}</span>`:''}
-            ${p.days_to_harvest===0?'<br><span style="color:var(--amber);font-weight:600">⚡ Harvest now</span>':p.days_to_harvest<2?`<br><span style="color:#d97706">🌾 Harvest in ${p.days_to_harvest} days · Grade ${p.grade}</span>`:''}
-          </div>
-          <div><span style="font-size:9px;font-weight:600;padding:3px 7px;border-radius:20px;background:${sc2}20;color:${sc2}">${p.status}</span></div>
-        </div>`;
-      }).join('')}
-    </div></div>`;
-    html+=`<div class="bsect">${shdr('Harvest Schedule')}<div class="bbody">
-      ${item('Pond B-2 — URGENT today before 20:00','Peak density reached. Grade B+. Est. yield 163 kg. Centrifuge ready.','var(--red)','var(--red)')}
-      ${item('Pond A-2 — Tomorrow 14:00–18:00','Peak at 16:30 per AI model. Grade A. Est. 187 kg. Solar: 85% clear.','var(--g500)','var(--g300)')}
-      ${item('Pond A-3 — Within 12–24 hours','Near-peak, pH rising. Harvest early for Grade A. Est. 201 kg.','var(--amber)','var(--amber)')}
-    </div></div>
-    <div class="bsect">${shdr('CO₂ Optimization')}<div class="bbody">
-      ${item('3 ponds need reallocation','B-3 +72% (pH 8.74). B-2 −29% (harvest imminent). A-3 +22% (pH buffer). Net utilization: 78%→91%.','var(--g600)','var(--g300)')}
-      ${item('7-day forecast: 712 kg','37.0 t CO₂/year annualized. March target on track.')}
-    </div></div>`;
-    html+=`<div class="bsect full">${shdr('7-Day Production Forecast')}<div class="bbody">
-      ${item('Total yield: 1,054 kg','3× Grade A (A-1, A-2, B-1). 1× urgent Grade B (B-2 today). A-4 and B-4 enter exponential phase ~March 18.')}
-      ${item('evoZero alignment: on track','107.4 kg CO₂/day avg. CIMAR Safi on course for 11.8 t biological CO₂ capture meeting Q1 Heidelberg requirements.')}
-    </div></div>`;
-    const bb=document.getElementById('brief-body'); if(bb) bb.innerHTML=html;
-  }catch(e){console.warn('briefing failed',e);}
-}
-
-// ══════════════════════════════════════════════════════
-// TAB SWITCHING
-// ══════════════════════════════════════════════════════
-async function showTab(name, el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  document.querySelectorAll('.cv').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');
-  document.getElementById('cv-'+name).classList.add('on');
-  const lp=document.getElementById('lp'), rp=document.getElementById('rp');
-  // show side panels only on overview
-  if(name==='overview'){lp.classList.remove('hide');rp.classList.remove('hide');}
-  else{lp.classList.add('hide');rp.classList.add('hide');}
-  if(name==='overview') setTimeout(()=>{resize3D();updateSkyLighting(curHour);},50);
-  else if(name==='monitor') buildMonitor();
-  else if(name==='co2') buildCO2();
-  else if(name==='harvest'){populateHvSel();loadPredChart();}
-  else if(name==='sim') simUpdate();
-  else if(name==='carbon') buildCarbon();
-  else if(name==='briefing') buildBriefing();
-}
-
-function rpTab(name, el){
-  document.querySelectorAll('.rtab').forEach(t=>t.classList.remove('on'));
-  document.querySelectorAll('.rview').forEach(v=>v.classList.remove('on'));
-  el.classList.add('on');
-  document.getElementById('rv-'+name).classList.add('on');
-}
-
-// TIME SLIDER
-async function onTimeSlider(val){
-  curHour=parseFloat(val);
-  const h=Math.floor(curHour), m=Math.round((curHour%1)*60);
-  const el=document.getElementById('time-val');
-  if(el) el.textContent=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
-  updateSkyLighting(curHour);
-  try{
-    const fresh=await apiFetch('/api/ponds?hour='+curHour);
-    ponds=fresh; buildKPIs(); buildPondList();
-    if(selPond){const u=fresh.find(p=>p.id===selPond.id);if(u)selPond_(u);}
-  }catch(e){console.warn('time slider fetch failed',e);}
-}
-
-// ══════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════
-async function init(){
-  try{
-    ponds=await apiFetch('/api/ponds?hour='+curHour);
-  }catch(e){
-    console.error('Initial fetch failed, retrying in 2s...',e);
-    await new Promise(r=>setTimeout(r,2000));
-    try{ ponds=await apiFetch('/api/ponds?hour='+curHour); }
-    catch(e2){ console.error('Retry failed',e2); return; }
-  }
-  buildKPIs();
-  buildPondList();
-  await buildAlerts();
-  // init 3D after short delay to allow layout to settle
-  setTimeout(()=>{
-    // Force wrap3d to be visible and have explicit size before WebGL init
-    const wrap=document.getElementById('wrap3d');
-    if(wrap){
-      wrap.style.minHeight='400px';
-      const canvas=document.getElementById('canvas3d');
-      if(canvas){
-        canvas.style.width='100%';
-        canvas.style.height='100%';
-        canvas.style.display='block';
-      }
-    }
-    init3D();
-    updateSkyLighting(curHour);
-    // Retry resize at increasing intervals
-    [100,300,600,1000,1500,2500].forEach(ms=>setTimeout(resize3D,ms));
-  },200);
-  const def=ponds.find(p=>p.id==='A-2')||ponds[0];
-  if(def) selPond_(def);
-  // periodic refresh
-  setInterval(async()=>{
-    try{
-      const fresh=await apiFetch('/api/ponds?hour='+curHour);
-      ponds=fresh; buildKPIs(); buildPondList();
-      const el1=document.getElementById('qph'), el2=document.getElementById('qtemp');
-      if(selPond){const u=fresh.find(p=>p.id===selPond.id);if(u){if(el1)el1.textContent=u.ph.toFixed(2);if(el2)el2.textContent=u.temperature.toFixed(1)+' °C';}}
-    }catch(e){}
-  },10000);
-}
-
-window.addEventListener('load', function(){
-  setTimeout(init, 50);
 });
+const F = "'Cormorant Garamond', Georgia, serif";
+
+/* ─── React helpers ───────────────────────────────────────────────── */
+const {useState, useEffect, useRef, useCallback, createElement: h} = React;
+
+/* ─── Highlight Popup ─────────────────────────────────────────────── */
+function HLPopup({txt, onConfirm, onCancel}){
+  const [col, setCol] = useState('amber');
+  const [note, setNote] = useState('');
+  return h('div', {className:'modal-bg', onClick:e=>{ if(e.target===e.currentTarget) onCancel(); }},
+    h('div', {className:'modal'},
+      h('p', {style:{fontFamily:F, fontSize:12, color:C.txtF, letterSpacing:'.07em', textTransform:'uppercase', marginBottom:8}}, 'Highlighting'),
+      h('p', {style:{fontFamily:F, fontSize:15, fontStyle:'italic', color:C.txtS, lineHeight:1.6, marginBottom:18,
+        maxHeight:80, overflow:'hidden', borderLeft:`3px solid ${C.brdL}`, paddingLeft:12}},
+        `"${txt.length>120 ? txt.slice(0,120)+'…' : txt}"`
+      ),
+      h('div', {style:{display:'flex', alignItems:'center', gap:10, marginBottom:18}},
+        h('span', {style:{fontFamily:F, fontSize:12, color:C.txtF}}, 'Colour'),
+        ...HL_COLORS.map(c =>
+          h('div', {key:c.id, className:`color-dot${col===c.id?' sel':''}`,
+            onClick:()=>setCol(c.id), title:c.label,
+            style:{background:c.bg, boxShadow:col===c.id?`0 0 0 2px ${c.bd}`:undefined,
+              borderColor:col===c.id?c.bd:'transparent'}})
+        )
+      ),
+      h('textarea', {className:'input-base', rows:3, placeholder:'Annotation… (optional)',
+        value:note, onChange:e=>setNote(e.target.value), style:{marginBottom:18}}),
+      h('div', {style:{display:'flex', gap:8, justifyContent:'flex-end'}},
+        h('button', {className:'btn btn-ghost', onClick:onCancel}, 'Cancel'),
+        h('button', {className:'btn btn-acc', onClick:()=>onConfirm(col, note)}, 'Save highlight')
+      )
+    )
+  );
+}
+
+/* ─── PDF Page ────────────────────────────────────────────────────── */
+function PdfPage({pdfDoc, pageNum, scale, highlights, onSaveHL, onClickHL}){
+  const pgRef = useRef(null);
+  const cvRef = useRef(null);
+  const tlRef = useRef(null);
+  const taskRef = useRef(null);
+  const [pending, setPending] = useState(null);
+
+  useEffect(()=>{
+    if(!pdfDoc || !cvRef.current) return;
+    let dead = false;
+    (async()=>{
+      try{ if(taskRef.current) taskRef.current.cancel(); }catch{}
+      const page = await pdfDoc.getPage(pageNum);
+      if(dead) return;
+      const vp = page.getViewport({scale});
+      const cv = cvRef.current;
+      cv.width = vp.width; cv.height = vp.height;
+      taskRef.current = page.render({canvasContext: cv.getContext('2d'), viewport: vp});
+      try{ await taskRef.current.promise; }catch{ return; }
+      if(dead || !tlRef.current) return;
+      const tl = tlRef.current;
+      tl.innerHTML = '';
+      tl.style.width = vp.width + 'px';
+      tl.style.height = vp.height + 'px';
+      const tc = await page.getTextContent();
+      if(dead) return;
+      try{
+        const r = window.pdfjsLib.renderTextLayer({textContentSource:tc, container:tl, viewport:vp, textDivs:[]});
+        if(r?.promise) await r.promise;
+      }catch{
+        try{ window.pdfjsLib.renderTextLayer({textContent:tc, container:tl, viewport:vp, textDivs:[]}); }catch{}
+      }
+    })();
+    return()=>{ dead=true; };
+  }, [pdfDoc, pageNum, scale]);
+
+  function onMouseUp(){
+    const sel = window.getSelection();
+    if(!sel || sel.isCollapsed) return;
+    const txt = sel.toString().trim();
+    if(!txt || !pgRef.current) return;
+    const base = pgRef.current.getBoundingClientRect();
+    const rects = Array.from(sel.getRangeAt(0).getClientRects())
+      .filter(r => r.width > 1 && r.height > 1)
+      .map(r => ({
+        top:   (r.top  - base.top)  / base.height * 100,
+        left:  (r.left - base.left) / base.width  * 100,
+        width:  r.width  / base.width  * 100,
+        height: r.height / base.height * 100,
+      }));
+    if(rects.length) setPending({txt, rects});
+  }
+
+  function confirmHL(colorId, note){
+    onSaveHL({id:uid(), page:pageNum, txt:pending.txt, rects:pending.rects, colorId, note, ts:Date.now()});
+    setPending(null);
+    window.getSelection()?.removeAllRanges();
+  }
+
+  const pageHLs = highlights.filter(h => h.page === pageNum);
+
+  return h('div', {ref:pgRef, style:{position:'relative', lineHeight:0, display:'inline-block'}},
+    h('canvas', {ref:cvRef, style:{display:'block'}}),
+    h('div', {className:'hl-layer'},
+      ...pageHLs.flatMap(hl => {
+        const col = HL_COLORS.find(c=>c.id===hl.colorId) || HL_COLORS[0];
+        return hl.rects.map((r,i) =>
+          h('div', {key:`${hl.id}-${i}`, className:'hl-rect',
+            onClick: ()=>onClickHL(hl.id),
+            style:{top:r.top+'%', left:r.left+'%', width:r.width+'%', height:r.height+'%',
+              background:col.bg, borderBottom:`2px solid ${col.bd}`}})
+        );
+      })
+    ),
+    h('div', {ref:tlRef, className:'tl', onMouseUp}),
+    pending && h(HLPopup, {txt:pending.txt, onConfirm:confirmHL, onCancel:()=>{ setPending(null); window.getSelection()?.removeAllRanges(); }})
+  );
+}
+
+/* ─── PDF Viewer ──────────────────────────────────────────────────── */
+function PdfViewer({doc, pdfReady}){
+  const [pdf, setPdf] = useState(null);
+  const [numPg, setNumPg] = useState(0);
+  const [scale, setScale] = useState(1.4);
+  const [hls, setHls] = useState([]);
+  const [busy, setBusy] = useState(true);
+
+  useEffect(()=>{
+    if(!pdfReady || !doc) return;
+    setBusy(true); setPdf(null); setNumPg(0);
+    const stored = store.get(K.hl(doc.id)) || [];
+    setHls(stored);
+    const b64 = doc._data || store.get(K.pdf(doc.id));
+    if(!b64){ setBusy(false); return; }
+    try{
+      const bin = atob(b64);
+      const arr = new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+      window.pdfjsLib.getDocument({data:arr}).promise.then(p=>{
+        setPdf(p); setNumPg(p.numPages); setBusy(false);
+      }).catch(e=>{ console.error(e); setBusy(false); });
+    }catch(e){ console.error(e); setBusy(false); }
+  }, [doc?.id, pdfReady]);
+
+  function saveHL(hl){
+    const next = [...hls, hl];
+    setHls(next);
+    store.set(K.hl(doc.id), next);
+    document.dispatchEvent(new CustomEvent('mg:hlupdate', {detail:next}));
+  }
+  function clickHL(id){
+    document.dispatchEvent(new CustomEvent('mg:focus', {detail:id}));
+  }
+
+  if(busy) return h(Center, null, h('p', {style:{fontFamily:F,fontSize:16,fontStyle:'italic',color:C.txtF}}, 'Loading manuscript…'));
+  if(!pdf)  return h(Center, null,
+    h('div', {style:{textAlign:'center'}},
+      h('p', {style:{fontFamily:F,fontSize:16,fontStyle:'italic',color:C.txtS,marginBottom:8}}, 'PDF not found in local storage.'),
+      h('p', {style:{fontFamily:F,fontSize:13,color:C.txtF}}, 'Please re-upload from the Library tab.')
+    )
+  );
+
+  return h('div', {style:{flex:1, display:'flex', flexDirection:'column', overflow:'hidden'}},
+    /* zoom bar */
+    h('div', {style:{display:'flex', gap:4, padding:'8px 16px', borderBottom:`1px solid ${C.brd}`,
+      background:C.surf, flexShrink:0, justifyContent:'center', alignItems:'center', flexWrap:'wrap'}},
+      ...[0.8,1.0,1.2,1.4,1.6,1.8,2.0].map(s =>
+        h('button', {key:s, className:`zoom-btn${scale===s?' active':''}`, onClick:()=>setScale(s)},
+          Math.round(s*100)+'%')
+      ),
+      h('div', {style:{width:1,height:14,background:C.brd,margin:'0 6px'}}),
+      h('span', {style:{fontFamily:F,fontSize:12,color:C.txtF,fontStyle:'italic'}},
+        numPg + (numPg===1?' page':' pages'))
+    ),
+    /* pages */
+    h('div', {style:{flex:1, overflow:'auto', padding:'32px 0', background:C.bg}},
+      h('div', {style:{display:'flex', flexDirection:'column', alignItems:'center', gap:20}},
+        ...Array.from({length:numPg},(_,i)=>i+1).map(n =>
+          h('div', {key:n, style:{boxShadow:'0 8px 48px rgba(0,0,0,.7)', borderRadius:2}},
+            h(PdfPage, {pdfDoc:pdf, pageNum:n, scale, highlights:hls, onSaveHL:saveHL, onClickHL:clickHL})
+          )
+        )
+      )
+    )
+  );
+}
+
+/* ─── Annotations Panel ───────────────────────────────────────────── */
+function AnnotationsPanel({docId}){
+  const [hls, setHls] = useState([]);
+  const [focused, setFocused] = useState(null);
+
+  useEffect(()=>{
+    setHls(store.get(K.hl(docId)) || []);
+    const upd = e => setHls(e.detail);
+    const foc = e => setFocused(e.detail);
+    document.addEventListener('mg:hlupdate', upd);
+    document.addEventListener('mg:focus', foc);
+    return()=>{
+      document.removeEventListener('mg:hlupdate', upd);
+      document.removeEventListener('mg:focus', foc);
+    };
+  }, [docId]);
+
+  function del(id){
+    const next = hls.filter(h=>h.id!==id);
+    setHls(next);
+    store.set(K.hl(docId), next);
+    document.dispatchEvent(new CustomEvent('mg:hlupdate', {detail:next}));
+  }
+
+  return h('div', {style:{width:290, borderLeft:`1px solid ${C.brd}`, background:C.surf,
+    display:'flex', flexDirection:'column', flexShrink:0}},
+    h('div', {style:{padding:'15px 18px', borderBottom:`1px solid ${C.brd}`, flexShrink:0,
+      display:'flex', alignItems:'center', justifyContent:'space-between'}},
+      h('span', {style:{fontFamily:F,fontSize:11,color:C.txtF,letterSpacing:'.09em',textTransform:'uppercase'}}, 'Annotations'),
+      h('span', {style:{fontFamily:F,fontSize:13,color:C.txtS}}, hls.length)
+    ),
+    h('div', {style:{flex:1, overflow:'auto', padding:'6px 0'}},
+      hls.length === 0
+        ? h('div', {style:{padding:'36px 18px', textAlign:'center'}},
+            h('div', {style:{fontSize:28,marginBottom:12,opacity:.35,color:C.acc}}, '✦'),
+            h('p', {style:{fontFamily:F,fontSize:14,fontStyle:'italic',color:C.txtF,lineHeight:1.7}},
+              'Select text in the PDF to begin annotating')
+          )
+        : hls.map(hl => {
+            const col = HL_COLORS.find(c=>c.id===hl.colorId) || HL_COLORS[0];
+            const isFoc = focused === hl.id;
+            return h('div', {key:hl.id, className:`ann-item${isFoc?' focused':''}`,
+              style:{border:`1px solid ${isFoc?col.bd:'transparent'}`}},
+              h('div', {style:{borderLeft:`3px solid ${col.bd}`, paddingLeft:10,
+                fontFamily:F, fontSize:14, fontStyle:'italic', color:'#D0C9BA', lineHeight:1.65, marginBottom:6}},
+                `"${hl.txt.length>130 ? hl.txt.slice(0,130)+'…' : hl.txt}"`
+              ),
+              h('div', {style:{display:'flex', justifyContent:'space-between', alignItems:'center'}},
+                h('span', {style:{fontSize:11,color:C.txtF,fontFamily:F}},
+                  `p.${hl.page} · ${new Date(hl.ts).toLocaleDateString()}`),
+                h('button', {onClick:()=>del(hl.id),
+                  style:{background:'none',border:'none',color:C.txtF,cursor:'pointer',fontSize:17,padding:'0 4px',lineHeight:1}}, '×')
+              ),
+              hl.note && h('p', {style:{marginTop:8,fontFamily:F,fontSize:13,color:C.txtS,lineHeight:1.6,
+                borderTop:`1px solid ${C.brd}`,paddingTop:8}}, hl.note)
+            );
+          })
+    )
+  );
+}
+
+/* ─── Essay Editor ────────────────────────────────────────────────── */
+function EssayEditor({essay, onUpdate}){
+  const titleRef = useRef(null);
+  const bodyRef  = useRef(null);
+  const timer    = useRef(null);
+  const [saved, setSaved] = useState(true);
+
+  useEffect(()=>{
+    if(!essay) return;
+    if(titleRef.current) titleRef.current.textContent = essay.title || '';
+    const body = store.get(K.essay(essay.id)) || '';
+    if(bodyRef.current) bodyRef.current.innerHTML = body;
+    setSaved(true);
+  }, [essay?.id]);
+
+  function schedSave(){
+    setSaved(false);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(()=>{
+      if(!essay || !titleRef.current || !bodyRef.current) return;
+      const t = titleRef.current.textContent.trim() || 'Untitled essay';
+      store.set(K.essay(essay.id), bodyRef.current.innerHTML);
+      onUpdate(essay.id, t);
+      setSaved(true);
+    }, 900);
+  }
+
+  function exec(cmd, val){ document.execCommand(cmd, false, val||null); bodyRef.current?.focus(); schedSave(); }
+
+  const tools = [
+    {l:'B',     cmd:'bold',        title:'Bold'},
+    {l:'I',     cmd:'italic',      title:'Italic', s:{fontStyle:'italic'}},
+    {l:'U',     cmd:'underline',   title:'Underline', s:{textDecoration:'underline'}},
+    null,
+    {l:'H1',    cmd:'formatBlock', val:'h1', title:'Heading 1'},
+    {l:'H2',    cmd:'formatBlock', val:'h2', title:'Heading 2'},
+    {l:'"',     cmd:'formatBlock', val:'blockquote', title:'Blockquote', s:{fontStyle:'italic'}},
+    {l:'¶',     cmd:'formatBlock', val:'p', title:'Paragraph'},
+    null,
+    {l:'—',     cmd:'insertText',  val:'—', title:'Em dash'},
+    {l:'·',     cmd:'insertUnorderedList', title:'List'},
+  ];
+
+  if(!essay) return h(Center, null,
+    h('div', {style:{textAlign:'center'}},
+      h('div', {style:{fontSize:38,marginBottom:16,opacity:.2,color:C.acc}}, '✎'),
+      h('p', {style:{fontFamily:F,fontSize:18,fontStyle:'italic',color:C.txtF,marginBottom:8}}, 'No essay selected'),
+      h('p', {style:{fontFamily:F,fontSize:14,color:C.txtF}}, 'Create one from the sidebar')
+    )
+  );
+
+  return h('div', {style:{flex:1, display:'flex', flexDirection:'column', overflow:'hidden'}},
+    /* toolbar */
+    h('div', {style:{display:'flex', gap:2, padding:'7px 16px', borderBottom:`1px solid ${C.brd}`,
+      background:C.surf, flexShrink:0, alignItems:'center', flexWrap:'wrap'}},
+      ...tools.map((t,i) =>
+        t === null
+          ? h('div', {key:'sep'+i, style:{width:1,height:16,background:C.brd,margin:'0 4px'}})
+          : h('button', {key:t.cmd+(t.val||''), className:'tool-btn', title:t.title,
+              onMouseDown:e=>{ e.preventDefault(); exec(t.cmd, t.val); },
+              style:t.s||{}}, t.l)
+      ),
+      h('div', {style:{flex:1}}),
+      h('span', {style:{fontFamily:F,fontSize:12,color:saved?C.txtF:C.acc,fontStyle:'italic',transition:'color .3s'}},
+        saved ? 'saved' : 'saving…')
+    ),
+    /* writing area */
+    h('div', {style:{flex:1, overflow:'auto', padding:'56px 0', background:C.bg}},
+      h('div', {style:{maxWidth:700, margin:'0 auto', padding:'0 52px'}},
+        h('div', {ref:titleRef, contentEditable:true, suppressContentEditableWarning:true,
+          'data-ph':'Untitled essay',
+          onInput:schedSave,
+          style:{fontFamily:F, fontSize:38, fontWeight:600, color:C.txt, lineHeight:1.2,
+            marginBottom:30, borderBottom:`1px solid ${C.brd}`, paddingBottom:22}}),
+        h('div', {ref:bodyRef, contentEditable:true, suppressContentEditableWarning:true,
+          className:'ed-body',
+          'data-ph':'Begin writing. The page is yours.',
+          onInput:schedSave,
+          style:{fontFamily:F, fontSize:20, color:'#CEC6B7', lineHeight:1.9, minHeight:500}})
+      )
+    )
+  );
+}
+
+/* ─── Library ─────────────────────────────────────────────────────── */
+function LibraryView({docs, onOpen, onRemove}){
+  const fRef = useRef(null);
+  const [drag, setDrag] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
+
+  async function processFile(file){
+    if(!file || !file.name.toLowerCase().endsWith('.pdf')){ setErr('Please upload a PDF file.'); return; }
+    setLoading(true); setErr('');
+    const buf = await file.arrayBuffer();
+    const bin = new Uint8Array(buf).reduce((s,b)=>s+String.fromCharCode(b),'');
+    const b64 = btoa(bin);
+    const id = uid();
+    const meta = {id, name:file.name.replace(/\.pdf$/i,''), ts:Date.now(), size:file.size};
+    const ok = store.set(K.pdf(id), b64);
+    if(!ok) setErr('PDF may be too large to persist; it will work this session only.');
+    setLoading(false);
+    onOpen({...meta, _data:b64});
+  }
+
+  function onFile(e){ if(e.target.files[0]) processFile(e.target.files[0]); e.target.value=''; }
+  function onDrop(e){ e.preventDefault(); setDrag(false); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); }
+
+  return h('div', {style:{flex:1, overflow:'auto', padding:'52px 48px', background:C.bg}, className:'fade-in'},
+    h('h1', {style:{fontFamily:F,fontSize:36,fontWeight:600,color:C.txt,marginBottom:6}}, 'Library'),
+    h('p', {style:{fontFamily:F,fontSize:17,fontStyle:'italic',color:C.txtS,marginBottom:48}},
+      'Your private reading collection'),
+    h('div', {style:{display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:16, maxWidth:980}},
+      /* upload card */
+      h('div', {className:`upload-zone${drag?' drag':''}`,
+        onClick:()=>fRef.current?.click(),
+        onDragOver:e=>{ e.preventDefault(); setDrag(true); },
+        onDragLeave:()=>setDrag(false),
+        onDrop},
+        loading
+          ? h('p', {style:{fontFamily:F,fontSize:14,fontStyle:'italic',color:C.txtF}}, 'Processing…')
+          : [
+              h('span', {key:'ico', style:{fontSize:28,color:C.txtF,lineHeight:1,opacity:.7}}, '+'),
+              h('span', {key:'txt', style:{fontFamily:F,fontSize:14,fontStyle:'italic',color:C.txtF}}, 'Upload PDF'),
+              h('span', {key:'sub', style:{fontFamily:F,fontSize:11,color:C.txtF,opacity:.6}}, 'or drag & drop')
+            ]
+      ),
+      /* doc cards */
+      ...docs.map(d =>
+        h('div', {key:d.id, className:'lib-card',
+          onClick:()=>onOpen(d)},
+          h('div', {style:{fontSize:26,marginBottom:12,opacity:.7}}, '📄'),
+          h('div', {style:{fontFamily:F,fontSize:16,fontWeight:600,color:C.txt,lineHeight:1.35,
+            flex:1,marginBottom:10}}, d.name),
+          h('div', {style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:'auto'}},
+            h('span', {style:{fontFamily:F,fontSize:11,color:C.txtF}},
+              new Date(d.ts).toLocaleDateString()),
+            h('button', {
+              onClick:e=>{ e.stopPropagation(); onRemove(d.id); },
+              style:{background:'none',border:'none',color:C.txtF,cursor:'pointer',
+                fontSize:18,padding:'0 4px',lineHeight:1,transition:'color .15s'},
+              onMouseEnter:e=>e.target.style.color=C.txtS,
+              onMouseLeave:e=>e.target.style.color=C.txtF
+            }, '×')
+          )
+        )
+      )
+    ),
+    err && h('p', {style:{fontFamily:F,fontSize:13,color:'#D25560',marginTop:16,fontStyle:'italic'}}, err),
+    h('input', {ref:fRef, type:'file', accept:'.pdf', onChange:onFile, style:{display:'none'}})
+  );
+}
+
+/* ─── Center helper ───────────────────────────────────────────────── */
+function Center({children}){
+  return h('div', {style:{flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}, children);
+}
+
+/* ─── Dashboard ───────────────────────────────────────────────────── */
+function Dashboard({docs, essays, onOpenDoc, onOpenEssay, onNewEssay}){
+  const totalHL = docs.reduce((sum,d)=>{ const h=store.get(K.hl(d.id)); return sum+(h?h.length:0); },0);
+
+  const stat = (n,label) => h('div', {style:{textAlign:'center'}},
+    h('div', {style:{fontFamily:F,fontSize:46,fontWeight:600,color:C.acc,lineHeight:1.1}}, n),
+    h('div', {style:{fontFamily:F,fontSize:13,color:C.txtF,marginTop:4,letterSpacing:'.06em',textTransform:'uppercase'}}, label)
+  );
+
+  return h('div', {style:{flex:1,overflow:'auto',padding:'52px 48px',background:C.bg}, className:'fade-in'},
+    h('h1', {style:{fontFamily:F,fontSize:36,fontWeight:600,color:C.txt,lineHeight:1.1,marginBottom:4}}, 'Marginalia'),
+    h('p', {style:{fontFamily:F,fontSize:17,fontStyle:'italic',color:C.txtS,marginBottom:48}},
+      'Your private space to read, annotate, and write.'),
+
+    /* stats */
+    h('div', {style:{display:'flex',gap:40,marginBottom:52,flexWrap:'wrap'}},
+      stat(docs.length,   'documents'),
+      stat(totalHL,       'highlights'),
+      stat(essays.length, 'essays'),
+    ),
+
+    /* recent docs */
+    docs.length > 0 && h('div', {style:{marginBottom:44}},
+      h('p', {style:{fontFamily:F,fontSize:12,color:C.txtF,letterSpacing:'.09em',textTransform:'uppercase',marginBottom:14}},
+        'Recent reading'),
+      h('div', {style:{display:'flex',flexDirection:'column',gap:2}},
+        ...docs.slice().sort((a,b)=>b.ts-a.ts).slice(0,5).map(d => {
+          const hlCount = (store.get(K.hl(d.id))||[]).length;
+          return h('div', {key:d.id,
+            onClick:()=>onOpenDoc(d),
+            style:{display:'flex',alignItems:'center',padding:'11px 14px',borderRadius:8,
+              cursor:'pointer',transition:'background .15s',gap:12},
+            onMouseEnter:e=>e.currentTarget.style.background=C.surf2,
+            onMouseLeave:e=>e.currentTarget.style.background='transparent'},
+            h('span', {style:{fontSize:18,opacity:.7}}, '📄'),
+            h('span', {style:{fontFamily:F,fontSize:15,color:C.txt,flex:1}}), d.name,
+            hlCount > 0 && h('span', {style:{fontFamily:F,fontSize:12,color:C.txtF,fontStyle:'italic'}},
+              hlCount + (hlCount===1?' highlight':' highlights'))
+          );
+        })
+      )
+    ),
+
+    /* recent essays */
+    essays.length > 0 && h('div', {},
+      h('div', {style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}},
+        h('p', {style:{fontFamily:F,fontSize:12,color:C.txtF,letterSpacing:'.09em',textTransform:'uppercase'}},
+          'Recent writing'),
+        h('button', {onClick:onNewEssay,
+          style:{fontFamily:F,fontSize:13,color:C.acc,background:'none',border:'none',cursor:'pointer',
+            padding:'4px 0',textDecoration:'none',transition:'opacity .15s'}},
+          '+ New essay')
+      ),
+      h('div', {style:{display:'flex',flexDirection:'column',gap:2}},
+        ...essays.slice().sort((a,b)=>b.ts-a.ts).slice(0,5).map(e =>
+          h('div', {key:e.id,
+            onClick:()=>onOpenEssay(e),
+            style:{display:'flex',alignItems:'center',padding:'11px 14px',borderRadius:8,
+              cursor:'pointer',transition:'background .15s',gap:12},
+            onMouseEnter:ev=>ev.currentTarget.style.background=C.surf2,
+            onMouseLeave:ev=>ev.currentTarget.style.background='transparent'},
+            h('span', {style:{fontSize:18,opacity:.7}}, '✎'),
+            h('span', {style:{fontFamily:F,fontSize:15,color:C.txt,flex:1}}, e.title),
+            h('span', {style:{fontFamily:F,fontSize:12,color:C.txtF}},
+              new Date(e.ts).toLocaleDateString())
+          )
+        )
+      )
+    ),
+
+    /* empty state */
+    docs.length===0 && essays.length===0 && h('div', {style:{marginTop:16}},
+      h('p', {style:{fontFamily:F,fontSize:15,fontStyle:'italic',color:C.txtF,lineHeight:1.75,maxWidth:480,marginBottom:24}},
+        'Begin by uploading a PDF in the Library tab. Highlight passages, add annotations, then write.'),
+      h('button', {
+        onClick:()=>document.dispatchEvent(new CustomEvent('mg:gotab',{detail:'library'})),
+        className:'btn btn-acc'
+      }, 'Go to Library →')
+    )
+  );
+}
+
+/* ─── App ─────────────────────────────────────────────────────────── */
+function App(){
+  const [pdfReady,  setPdfReady]  = useState(false);
+  const [tab,       setTab]       = useState('home');
+  const [docs,      setDocs]      = useState([]);
+  const [curDoc,    setCurDoc]    = useState(null);
+  const [essays,    setEssays]    = useState([]);
+  const [curEssay,  setCurEssay]  = useState(null);
+  const [annOpen,   setAnnOpen]   = useState(true);
+  const [dark,      setDark]      = useState(()=> store.get('mg:dark') || false);
+
+  useEffect(()=>{
+    document.documentElement.classList.toggle('dark', dark);
+    store.set('mg:dark', dark);
+  }, [dark]);
+
+  /* load PDF.js */
+  useEffect(()=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = ()=>{
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      setPdfReady(true);
+    };
+    document.head.appendChild(s);
+  }, []);
+
+  /* load persisted metadata */
+  useEffect(()=>{
+    setDocs(store.get(K.docs) || []);
+    setEssays(store.get(K.essays) || []);
+  }, []);
+
+  useEffect(()=>{
+    const go = e => setTab(e.detail);
+    document.addEventListener('mg:gotab', go);
+    return () => document.removeEventListener('mg:gotab', go);
+  }, []);
+
+  async function openDoc(meta){
+    if(!docs.find(d=>d.id===meta.id)){
+      const nd = [...docs, {id:meta.id, name:meta.name, ts:meta.ts, size:meta.size}];
+      setDocs(nd); store.set(K.docs, nd);
+    }
+    setCurDoc(meta); setTab('reader');
+  }
+  function removeDoc(id){
+    const nd = docs.filter(d=>d.id!==id);
+    setDocs(nd); store.set(K.docs, nd);
+    if(curDoc?.id===id) setCurDoc(null);
+  }
+  function newEssay(){
+    const e = {id:uid(), title:'Untitled essay', ts:Date.now()};
+    const ne = [...essays, e];
+    setEssays(ne); store.set(K.essays, ne);
+    setCurEssay(e); setTab('essays');
+  }
+  function openEssay(e){ setCurEssay(e); setTab('essays'); }
+  function updEssay(id, title){
+    const ne = essays.map(e=>e.id===id ? {...e,title,ts:Date.now()} : e);
+    setEssays(ne); store.set(K.essays, ne);
+    if(curEssay?.id===id) setCurEssay(ne.find(e=>e.id===id));
+  }
+  function removeEssay(id){
+    const ne = essays.filter(e=>e.id!==id);
+    setEssays(ne); store.set(K.essays, ne);
+    if(curEssay?.id===id) setCurEssay(null);
+  }
+
+  const nav = [
+    {id:'home',    icon:'◇', label:'Home'},
+    {id:'library', icon:'○', label:'Library'},
+    {id:'reader',  icon:'◑', label:'Reader'},
+    {id:'essays',  icon:'✎', label:'Essays'},
+  ];
+
+  return h('div', {style:{display:'flex', height:'100vh', background:'var(--bg)', color:'var(--txt)', overflow:'hidden', fontFamily:F}},
+
+    /* ── SIDEBAR ── */
+    h('div', {style:{width:232, background:C.surf, borderRight:`1px solid ${C.brd}`, display:'flex', flexDirection:'column', flexShrink:0}},
+
+      /* logo */
+      h('div', {style:{padding:'18px 18px 16px', borderBottom:`1px solid ${C.brd}`, display:'flex', alignItems:'center', justifyContent:'space-between'}},
+        h('div', null,
+          h('div', {style:{fontSize:22, fontWeight:700, color:C.burg, lineHeight:1, letterSpacing:'.01em'}}, 'Marginalia'),
+          h('div', {style:{fontSize:12, color:C.txtF, fontStyle:'italic', marginTop:5}}, 'private reading & writing')
+        ),
+        h('div', {style:{display:'flex',flexDirection:'column',alignItems:'center',gap:3}},
+          h('button', {className:'theme-toggle', title: dark?'Switch to light':'Switch to dark',
+            onClick:()=>setDark(d=>!d)}),
+          h('span', {style:{fontFamily:F,fontSize:9,color:C.txtF,letterSpacing:'.04em'}}, dark?'dark':'light')
+        )
+      ),
+
+      /* nav */
+      h('div', {style:{padding:'10px 8px', borderBottom:`1px solid ${C.brd}`, flexShrink:0}},
+        ...nav.map(n =>
+          h('button', {key:n.id, className:`nav-btn${tab===n.id?' active':''}`,
+            style:{color: tab===n.id ? C.burg : C.txtS},
+            onClick:()=>setTab(n.id)},
+            h('span', {style:{fontSize:12,lineHeight:1,flexShrink:0}}, n.icon),
+            n.label
+          )
+        )
+      ),
+
+      /* list pane */
+      h('div', {style:{flex:1, overflow:'auto', padding:'10px 8px'}},
+        tab === 'essays'
+          ? h('div', null,
+              h('div', {style:{padding:'2px 12px 8px', fontSize:11, color:C.txtF, letterSpacing:'.08em', textTransform:'uppercase'}}, 'Essays'),
+              ...essays.map(e =>
+                h('div', {key:e.id, className:`doc-item${curEssay?.id===e.id?' active':''}`,
+                  onClick:()=>openEssay(e)},
+                  h('div', {style:{flex:1, overflow:'hidden'}},
+                    h('div', {style:{fontSize:13, color:curEssay?.id===e.id?C.txt:C.txtS,
+                      overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}, e.title),
+                    h('div', {style:{fontSize:11, color:C.txtF, marginTop:2}},
+                      new Date(e.ts).toLocaleDateString())
+                  ),
+                  h('button', {onClick:ev=>{ev.stopPropagation();removeEssay(e.id);},
+                    style:{background:'none',border:'none',color:C.txtF,cursor:'pointer',
+                      fontSize:17,padding:'0 0 0 8px',lineHeight:1,flexShrink:0}}, '×')
+                )
+              ),
+              h('button', {onClick:newEssay,
+                style:{width:'100%',padding:'8px 12px',marginTop:4,background:'transparent',
+                  border:`1px dashed ${C.brdL}`,color:C.txtF,fontFamily:F,fontSize:13,
+                  cursor:'pointer',borderRadius:8,transition:'all .15s',textAlign:'center'}},
+                '+ New essay')
+            )
+          : h('div', null,
+              h('div', {style:{padding:'2px 12px 8px', fontSize:11, color:C.txtF, letterSpacing:'.08em', textTransform:'uppercase'}}, 'Documents'),
+              ...docs.map(d =>
+                h('div', {key:d.id, className:`doc-item${curDoc?.id===d.id?' active':''}`,
+                  onClick:()=>openDoc(d)},
+                  h('span', {style:{fontSize:13,color:curDoc?.id===d.id?C.txt:C.txtS,
+                    overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}}, d.name),
+                  h('button', {onClick:e=>{e.stopPropagation();removeDoc(d.id);},
+                    style:{background:'none',border:'none',color:C.txtF,cursor:'pointer',
+                      fontSize:17,padding:'0 0 0 8px',lineHeight:1,flexShrink:0}}, '×')
+                )
+              ),
+              docs.length===0 && h('p', {style:{padding:'8px 12px',fontFamily:F,fontSize:13,fontStyle:'italic',color:C.txtF}}, 'No documents yet')
+            )
+      ),
+
+      /* annotation toggle */
+      tab==='reader' && curDoc && h('div', {style:{padding:'10px 8px', borderTop:`1px solid ${C.brd}`, flexShrink:0}},
+        h('button', {onClick:()=>setAnnOpen(o=>!o),
+          style:{width:'100%',padding:'8px 12px',background:annOpen?C.surf3:'transparent',
+            border:`1px solid ${C.brd}`,color:annOpen?C.acc:C.txtS,fontFamily:F,fontSize:13,
+            cursor:'pointer',borderRadius:8,transition:'all .15s',display:'flex',
+            alignItems:'center',gap:8,justifyContent:'center'}},
+          h('span', {style:{fontSize:12}}, '◧'),
+          annOpen ? 'Hide annotations' : 'Show annotations'
+        )
+      )
+    ),
+
+    /* ── MAIN ── */
+    h('div', {style:{flex:1, display:'flex', overflow:'hidden'}},
+      tab==='home'    && h(Dashboard, {docs, essays, onOpenDoc:openDoc, onOpenEssay:openEssay, onNewEssay:newEssay}),
+      tab==='library' && h(LibraryView, {docs, onOpen:openDoc, onRemove:removeDoc}),
+      tab==='reader'  && !curDoc && h(Center, null,
+        h('div', {style:{textAlign:'center'}},
+          h('div', {style:{fontSize:36,marginBottom:16,opacity:.2,color:C.acc}}, '◑'),
+          h('p', {style:{fontFamily:F,fontSize:18,fontStyle:'italic',color:C.txtF,marginBottom:8}}, 'No document open'),
+          h('p', {style:{fontFamily:F,fontSize:14,color:C.txtF}}, 'Go to the Library and upload a PDF')
+        )
+      ),
+      tab==='reader' && curDoc && h(PdfViewer, {key:curDoc.id, doc:curDoc, pdfReady}),
+      tab==='reader' && curDoc && annOpen && h(AnnotationsPanel, {key:curDoc.id+'a', docId:curDoc.id}),
+      tab==='essays'  && h(EssayEditor, {essay:curEssay, onUpdate:updEssay})
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
 </script>
 </body>
 </html>
